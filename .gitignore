@@ -1,5 +1,6 @@
 .env
 service_account.json
+service-account-key.json
 __pycache__/
 *.pyc
 .DS_Store
