@@ -1,0 +1,32 @@
+Created folder 'MASTERI 2026' (ID: 1VXm97kMJWIxrSAtktNYbZHQchWRDWR7r)
+Traceback (most recent call last):
+  File "C:\Users\KNgan\Desktop\python_scripts\upload_to_drive.py", line 116, in <module>
+    upload_folder_images(LOCAL_FOLDER, DRIVE_FOLDER_NAME)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KNgan\Desktop\python_scripts\upload_to_drive.py", line 98, in upload_folder_images
+    print(f"Uploaded: {file_name} \u2192 ID: {file.get('id')}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KNgan\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 119: character maps to <undefined>
+Created folder 'LANDMARD 810 Apartments' (ID: 1pqsdpb-tAWRwrn9xA-M8byjcA6R4KZ-j)
+Uploaded: jimeng-2025-05-21-860-First-person view_ Legs stretched out on a messy futon inside a cramped Airbnb....jpeg ID: 1eCnqs3iiiZfukGuYpLU81_BpX11Cz6f8
+Uploaded: jimeng-2025-05-21-861-First-person view_ Hands rummage through the suitcase, pulling out bizarre and....jpeg ID: 1fvYj-zAmiUegeBXLkB_BcaQIRP7aZHqz
+Uploaded: jimeng-2025-05-21-862-3. Travel_Transition SceneFirst-person view_ Walking through a bustling Europe....jpeg ID: 1K9CEDFRVPHPvHdYVCtOjwb6fU6dKVGtE
+Uploaded: jimeng-2025-05-21-863-First-person view_ Sitting on a bench in a quiet park, hands holding a travel ....jpeg ID: 1l7d-Ph_EeOTyr1bq2YV4OpCkVJrbwZrY
+Uploaded: jimeng-2025-05-21-864-First-person view_ Rapid transformations in new locations_Wearing a chef’s apr....jpeg ID: 1qcb69L43wzoNTs-CF8JyT4o7QCWrHrTC
+Uploaded: jimeng-2025-05-21-865-First-person view_ Walking through a crowded plaza, you spot someone waving — ....jpeg ID: 1Xz9LzXssCDtZ0A91LL8hwciFsxKYRXLm
+Uploaded: jimeng-2025-05-21-866-First-person view_ Walking through a crowded plaza, you spot someone waving — ....jpeg ID: 1v2uQf_zW3Aebxes1HeoDLKCLB-E525Ar
+Uploaded: jimeng-2025-05-21-867-First-person view_ Just as you’re closing the suitcase back at your Airbnb, so....jpeg ID: 1uMXc_jiHmgCoCRAN7VFb0v7cP5M9CD4W
+Traceback (most recent call last):
+  File "C:\Users\KNgan\Desktop\python_scripts\upload_to_drive.py", line 116, in <module>
+    upload_folder_images(LOCAL_FOLDER, DRIVE_FOLDER_NAME)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KNgan\Desktop\python_scripts\upload_to_drive.py", line 104, in upload_folder_images
+    print(f"\nHoàn t\u1ea5t! \u0110ã upload {uploaded_count} \u1ea3nh.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\KNgan\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u1ea5' in position 8: character maps to <undefined>
