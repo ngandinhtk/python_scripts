@@ -15,19 +15,19 @@ if sys.stdout.encoding != 'utf-8':
     sys.stdout.reconfigure(encoding='utf-8')
 
 # ================== CẤU HÌNH ==================
-# load_dotenv()  # Nếu dùng .env cho token
+load_dotenv()  # Load variables from .env file
 
 # Facebook
-FACEBOOK_PAGE_ID = "383742208160778"                 # ID Fanpage
-FACEBOOK_ACCESS_TOKEN = "EAAJ1KgB05tMBQndtjVQPq4PIcvHZCxmXL2lZCtgrilO7VNbpuOWk6PrZATdAT7CVZCFKPshq1ZCZBQKSXNz0aclXqkhaO2lN9W4nd3fSrCwM9oFzLaq0tM6sov6eaIGH1WY4xIZCl2Byg4dJQ6eoZBZA9cqXYv51E08PXu96tdgbB8CZBSktwwEQr8FZC0Ip1P7SwGM4Exy"    # Page Access Token long-lived
+FACEBOOK_PAGE_ID = os.getenv("FACEBOOK_PAGE_ID")
+FACEBOOK_ACCESS_TOKEN = os.getenv("FACEBOOK_ACCESS_TOKEN")
 
 # Google Sheets
-CREDENTIALS_JSON_PATH = "service_account.json"      # Đường dẫn file JSON key
-SPREADSHEET_ID = "1CGOPTz5futpJuenRrqoSaA7v8r7PNMNlsyS-Bl-gNQU"  # ID sheet
-WORKSHEET_NAME = "Sheet4"                               # Tên tab
+CREDENTIALS_JSON_PATH = os.getenv("CREDENTIALS_JSON_PATH", "service_account.json")
+SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
+WORKSHEET_NAME = os.getenv("WORKSHEET_NAME", "Sheet4")
 
 # Gemini AI
-GEMINI_API_KEY = "AIzaSyApbTgbJrqcOhEZu5LgvxLBxSCaeKRDJk8"  # <-- Điền API Key của bạn vào đây
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 DELAY_BETWEEN_POSTS = 600  # giây → 10 phút, chỉnh tùy ý (ví dụ 300 = 5 phút)
 
