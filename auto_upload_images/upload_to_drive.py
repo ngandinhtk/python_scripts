@@ -13,8 +13,8 @@ SCOPES = ['https://www.googleapis.com/auth/drive.file']  # Chỉ cho phép app t
 # Hoặc dùng 'https://www.googleapis.com/auth/drive' nếu cần full quyền
 
 # Fix encoding for Vietnamese text on Windows
-if sys.stdout.encoding != 'utf-8':
-    sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
 
 def get_drive_service():
     """Authenticate và trả về service Drive"""

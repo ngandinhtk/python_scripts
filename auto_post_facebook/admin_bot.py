@@ -90,7 +90,7 @@ def upload_unpublished_photo(image_path):
     try:
         if image_path.startswith("http://") or image_path.startswith("https://"):
             payload["url"] = image_path
-            response = requests.post(url, data=payload)
+            response = requests.post(url, data=payload, timeout=60)
         else:
             if not os.path.exists(image_path):
                 print(f"✗ File ảnh không tìm thấy: {image_path}")
@@ -98,7 +98,7 @@ def upload_unpublished_photo(image_path):
             
             with open(image_path, "rb") as img_file:
                 files = {"source": img_file}
-                response = requests.post(url, data=payload, files=files)
+                response = requests.post(url, data=payload, files=files, timeout=120)
         
         result = response.json()
         if "id" in result:
@@ -117,7 +117,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
     
     # Thêm hashtag vào caption nếu có
     if (hashtag and link) or product:
-        caption = f"🔥 {product} \n\n {caption}\n\n👉 Click link để xem giá tốt nhất hôm nay — ưu đãi có thể hết sớm: {link}\n\n{hashtag}"
+        caption = f"🔥 {product} \n\n {caption}\n\n👉 Click link xem ngay trước khi “cháy hàng”: {link}\n\n{hashtag}"
     
 
     # TRƯỜNG HỢP 1: ĐĂNG 1 ẢNH 
@@ -134,7 +134,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
         if image_path.startswith("http://") or image_path.startswith("https://"):
             payload["url"] = image_path
             try:
-                response = requests.post(url, data=payload)
+                response = requests.post(url, data=payload, timeout=60)
                 result = response.json()
                 if "id" in result:
                     print(f"✓ ĐĂNG THÀNH CÔNG (1 ảnh)!")
@@ -151,7 +151,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
             try:
                 with open(image_path, "rb") as f:
                     files = {"source": f}
-                    response = requests.post(url, data=payload, files=files)
+                    response = requests.post(url, data=payload, files=files, timeout=120)
                     result = response.json()
                     if "id" in result:
                         print(f"✓ ĐĂNG THÀNH CÔNG (1 ảnh)!")
@@ -173,7 +173,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
             if pid:
                 media_ids.append({"media_fbid": pid})
             else:
-                print("  -> Bỏ qua ảnh lỗi")
+                print("  -> Upload ảnh thất bại, bỏ qua ảnh này.")
         
         if not media_ids:
             print("✗ Không upload được ảnh nào thành công.")
@@ -189,7 +189,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
         }
         
         try:
-            response = requests.post(url, data=payload)
+            response = requests.post(url, data=payload, timeout=60)
             result = response.json()
             
             if "id" in result:
@@ -222,7 +222,7 @@ def main():
     if not all(col in df.columns for col in required_cols):
         print("Sheet thiếu cột bắt buộc: Caption và ImagePath")
         return
-    
+
     # Nếu có cột Trạng thái → chỉ xử lý "Inprocess"
     if "Trạng thái" in df.columns:
         df = df[df["Trạng thái"].str.contains("Inprocess", na=False, case=False)]
@@ -241,7 +241,7 @@ def main():
         
         # Tách nhiều ảnh bằng dấu phẩy hoặc xuống dòng
         image_paths = [x.strip() for x in image_raw.replace('\n', ',').split(',') if x.strip()]
-        
+
         if not caption or not image_paths:
             print(f"Bỏ qua dòng {index + 2}: thiếu caption hoặc ảnh")
             continue

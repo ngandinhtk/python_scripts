@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import time
 import random
@@ -5,6 +6,7 @@ from playwright.sync_api import sync_playwright
 
 EMAIL = "your_email"
 PASSWORD = "your_password"
+STORAGE_FILE = "playwright_state.json"
 
 CSV_FILE = "products.csv"
 
@@ -19,13 +21,13 @@ def login_facebook(page):
     page.fill("#pass", PASSWORD)
     page.click("button[name='login']")
 
-    page.wait_for_timeout(6000)
+    page.wait_for_timeout(6000) 
 
 def post_marketplace(page, product):
     print("Posting:", product["title"])
 
     page.goto("https://www.facebook.com/marketplace/create/item")
-    page.wait_for_timeout(5000)
+    page.wait_for_timeout(5000) 
 
     # Upload image
     page.set_input_files("input[type=file]", product["image_path"])
@@ -58,10 +60,24 @@ def main():
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
 
-        login_facebook(page)
+        # If we have a saved storage state, load it so we don't need to login every time
+        if os.path.exists(STORAGE_FILE):
+            context = browser.new_context(storage_state=STORAGE_FILE)
+            page = context.new_page()
+
+            # Quick check: if the login form still appears, perform login and update storage
+            page.goto("https://www.facebook.com/")
+            page.wait_for_timeout(3000)
+            if page.query_selector("#email"):
+                login_facebook(page)
+                context.storage_state(path=STORAGE_FILE)
+        else:
+            context = browser.new_context()
+            page = context.new_page()
+            login_facebook(page)
+            # Save storage so next run can reuse the logged-in session
+            context.storage_state(path=STORAGE_FILE)
 
         for _, row in df.iterrows():
             try:

@@ -1,0 +1,15 @@
+Ví dụ kịch bản thực tế
+
+- User: "Chào bạn, tôi muốn tìm thuê chung cư."
+AI (Suy luận): Có nhu cầu (Thuê), thiếu Tên, SĐT, Chi tiết, Thời gian.
+- AI Reponse: "Chào bạn! Mình là trợ lý ảo. Bạn muốn thuê khu vực nào và ngân sách khoảng bao nhiêu?"
+- User: "Quận 1, tầm 15 triệu. Tôi cần gấp trong tuần này."
+AI (Suy luận): Có Chi tiết (Q1, 15tr), Thời gian (tuần này). Thiếu Tên, SĐT.
+- AI Response: "Vâng. Để mình gửi danh sách phòng phù hợp, bạn cho mình xin Tên và SĐT nhé?"
+- User: "Tôi tên Nam, sđt 0909123456."
+AI (Suy luận): Đã đủ 5 yếu tố -> Kích hoạt Tool save_qualified_lead.
+System: Lưu vào DB: {name: "Nam", phone: "0909...", type: "Thuê", details: "Q1, 15tr", time: "Gấp"}.
+- AI Response: "Cảm ơn anh Nam. Thông tin đã được ghi nhận, bên em sẽ liên hệ qua số 0909123456 ngay ạ."
+Điểm cần lưu ý trong mã nguồn
+Stateless API: Server không tự lưu lịch sử chat trong RAM giữa các request (để tiết kiệm tài nguyên và dễ mở rộng). Client phải chịu trách nhiệm gửi lại chat_history cũ kèm theo tin nhắn mới mỗi lần gọi API.
+Database: Dữ liệu Lead được lưu bền vững trong leads.db và có thể truy xuất qua endpoint GET /leads.

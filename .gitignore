@@ -1,6 +1,13 @@
+# Environment variables
 .env
+
+# Google Credentials & Tokens
 service_account.json
 service-account-key.json
+credentials.json
+token.json
+
+# Python cache
 __pycache__/
 *.pyc
 .DS_Store
