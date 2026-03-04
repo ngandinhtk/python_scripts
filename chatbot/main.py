@@ -23,9 +23,17 @@ async def lifespan(app: FastAPI):
     await init_db()
 
     # 2. Sync du lieu Google Sheets -> Chroma lan dau
-    asyncio.create_task(sheets_service.start_auto_sync())
+    sync_task = asyncio.create_task(sheets_service.start_auto_sync())
 
     yield
+
+    # Cleanup background task
+    sync_task.cancel()
+    try:
+        await sync_task
+    except asyncio.CancelledError:
+        pass
+
     logger.info("app.shutdown")
 
 

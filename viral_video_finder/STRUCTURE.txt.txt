@@ -1,0 +1,53 @@
+ ## Project Structure
+
+   ``
+   viral_video_finder/
+   ├── config.py              # Configuration (thresholds, API endpoints, etc.)
+   ├── main.py                # Entry point - CLI interface
+   ├── tiktok_scraper.py      # TikTok viral video discovery
+   ├── douyin_scraper.py      # Douyin viral video discovery
+   ├── models.py              # Data models for videos
+   ├── utils.py               # Shared utilities (formatting, export)
+   ├── export.py              # Export results to CSV/JSON
+   ├── requirements.txt       # Dependencies
+   └── README.md              # Documentation
+   `
+
+   ## Key Features
+
+   1. **TikTok Trending Discovery**
+      - Fetch trending/popular videos using unofficial API endpoints
+      - Search by hashtag to find viral content in specific niches
+      - Filter by view count, like count, share count thresholds
+
+   2. **Douyin Trending Discovery**
+      - Fetch Douyin hot search/trending topics
+      - Discover viral videos from Douyin's trending feed
+      - Search by keyword/hashtag
+
+   3. **Viral Detection Criteria**
+      - Configurable thresholds (e.g., >1M views, >100K likes)
+      - Engagement rate calculation (likes + comments + shares / views)
+      - Rapid growth detection (recent videos with high engagement)
+
+   4. **Output & Export**
+      - Display results in a formatted table in the terminal
+      - Export to CSV and JSON files
+      - Include video URL, author, description, view/like/share counts, engagement rate
+
+   ## Technical Approach
+
+   - **httpx** - Async HTTP client for API requests
+   - **playwright** or **selenium** - For pages requiring JavaScript rendering (fallback)
+   - **rich** - Beautiful terminal output with tables
+   - **pandas` - Data manipulation and CSV export
+
+   ### API Strategy:
+   - TikTok: Use the unofficial web API endpoints that the TikTok website uses (trending feed, search endpoints)
+   - Douyin: Use Douyin's web API endpoints for hot search and trending content
+   - Both will use proper headers/cookies to mimic browser requests
+
+   ## Important Notes
+
+⚠️ Disclaimer: This bot uses unofficial APIs. TikTok/Douyin may change their APIs at any time, and heavy usage may result in
+   rate limiting or IP blocking. This is for educational/research purposes.

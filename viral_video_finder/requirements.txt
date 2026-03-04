@@ -1,0 +1,5 @@
+httpx
+rich
+yt-dlp
+argparse
+playwright
