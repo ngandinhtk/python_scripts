@@ -207,90 +207,45 @@ class FacebookMarketplaceBot:
         try:
             location_input = None
             
-            # Method 1: Find by CSS selector for combobox inputs
-            try:
-                location_input = self.wait.until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, "input[role='textbox'][aria-label*='Location' i]"))
-                )
-                print("✓ Found location input via role='textbox'")
-            except TimeoutException:
-                pass
-            
-            # Method 2: Find by placeholder containing "address" or "location"  
-            if not location_input:
-                try:
-                    location_input = self.wait.until(
-                        EC.element_to_be_clickable((By.XPATH, "//input[contains(translate(@placeholder, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'address') or contains(translate(@placeholder, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'location')]"))
-                    )
-                    print("✓ Found location input via placeholder")
-                except TimeoutException:
-                    pass
-            
-            # Method 3: Find by aria-label
-            if not location_input:
-                try:
-                    location_input = self.wait.until(
-                        EC.element_to_be_clickable((By.XPATH, "//input[contains(translate(@aria-label, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'location') or contains(translate(@aria-label, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'address')]"))
-                    )
-                    print("✓ Found location input via aria-label")
-                except TimeoutException:
-                    pass
-            
-            # Method 4: Find by proximity to map icon
-            if not location_input:
-                try:
-                    location_input = self.wait.until(
-                        EC.element_to_be_clickable((By.XPATH, "//svg[contains(@viewBox, '10')]/ancestor::div[@role='presentation' or @role='menuitem']/following-sibling::div//input"))
-                    )
-                    print("✓ Found location input via icon proximity")
-                except TimeoutException:
-                    pass
-            
+        
             # Method 5: Generic search - all text inputs and find the one that works
-            if not location_input:
-                try:
-                    all_inputs = self.driver.find_elements(By.XPATH, "//input[@type='text' or (not(@type) and parent::div)]")
-                    # Take inputs after the description field
-                    if len(all_inputs) >= 6:
-                        location_input = all_inputs[5]  # Usually location is the 6th input
-                        print("✓ Found location input via position (6th input)")
-                except (TimeoutException, IndexError):
-                    pass
-            
+            try:
+                all_inputs = self.driver.find_elements(By.XPATH, "//input[@type='text' or (not(@type) and parent::div)]")
+                
+                if len(all_inputs) >= 4:
+                    location_input = all_inputs[3]  # Keeping hardcoded index as requested
+                    print("✓ Found location input via position (all_inputs[3])")
+
+                    self.driver.execute_script("arguments[0].click();", location_input)
+                    time.sleep(0.5)
+                    
+                    location_input.send_keys(Keys.CONTROL + "a")
+                    location_input.send_keys(Keys.DELETE)
+                    time.sleep(0.3)
+                    
+                    location_input.send_keys(location_value)
+                    time.sleep(1)
+                    
+                    try:
+                        first_option = self.wait.until(EC.element_to_be_clickable((By.XPATH, "(//*[@role='option'])[1]")))
+                        first_option.click()
+                        print("✓ Selected first location suggestion")
+                    except TimeoutException:
+                        print("⚠️  No suggestions found, keeping typed value")
+
+            except (TimeoutException, IndexError, Exception) as e:
+                print(f"Error in location finding logic: {e}")
+
             if not location_input:
                 print("⚠️  WARNING: Could not find location input - will skip location")
                 return
             
             print(f"DEBUG: Location input found - Placeholder: {location_input.get_attribute('placeholder')}")
-            
-            # Click on the input to activate it
-            self.driver.execute_script("arguments[0].click();", location_input)
-            time.sleep(0.5)
-            
-            # Clear existing content
-            location_input.clear()
-            time.sleep(0.3)
-            
-            # Type the location
-            location_input.send_keys(location_value)
-            print(f"Typed location: {location_value}")
-            time.sleep(2)
-            
+        
             # Wait for dropdown and select first option
-            try:
-                self.wait.until(EC.presence_of_element_located((By.XPATH, "//*[@role='option']")))
-                first_option = self.wait.until(EC.element_to_be_clickable((By.XPATH, "(//*[@role='option'])[1]")))
-                first_option.click()
-                print("✓ Selected first location suggestion")
-                time.sleep(1)
-            except TimeoutException:
-                print("⚠️  No suggestions found - proceeding with typed location")
-                
+           
         except Exception as e:
             print(f"⚠️  Location fill error (non-blocking): {str(e)[:100]}")
-
-
-
 
     def _select_dropdown(self, label, value):
         """Selects an option from a dropdown."""

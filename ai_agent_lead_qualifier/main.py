@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 import uvicorn
 from typing import List, Dict, Any, Optional
@@ -73,7 +74,7 @@ async def get_leads_endpoint(limit: int = 10) -> List[Dict[str, Any]]:
 
 # --- Facebook Webhook Endpoints ---
 
-@app.get("/webhook")
+@app.get("/webhook", response_class=PlainTextResponse)
 async def verify_webhook(
     mode: str = Query(..., alias="hub.mode"),
     token: str = Query(..., alias="hub.verify_token"),
@@ -83,7 +84,7 @@ async def verify_webhook(
     Endpoint để Facebook xác thực Webhook của bạn.
     """
     if mode == "subscribe" and token == FB_VERIFY_TOKEN:
-        return int(challenge)
+        return challenge
     raise HTTPException(status_code=403, detail="Verification failed")
 
 @app.post("/webhook")

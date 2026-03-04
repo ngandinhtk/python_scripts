@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+gspread
+google-auth
+pydantic-settings
+chromadb
+structlog

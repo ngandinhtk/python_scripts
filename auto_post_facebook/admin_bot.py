@@ -1,12 +1,17 @@
 import os
 import sys
 import time
+import io
 import requests
 import json
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
+
+# Drive API utilities
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
 
 # Fix encoding for Vietnamese text on Windows
 if sys.stdout.encoding != 'utf-8':
@@ -18,6 +23,9 @@ load_dotenv()  # Nếu dùng .env cho token
 # Facebook
 FACEBOOK_PAGE_ID = os.getenv("FACEBOOK_PAGE_ID")
 FACEBOOK_ACCESS_TOKEN = os.getenv("FACEBOOK_ACCESS_TOKEN")
+
+# Google Drive (optional) – thư mục gốc chứa các thư mục theo category
+DRIVE_ROOT_FOLDER_ID = os.getenv("DRIVE_ROOT_FOLDER_ID", "")
 
 # Google Sheets
 CREDENTIALS_JSON_PATH = os.getenv("CREDENTIALS_JSON_PATH", "service-account-key.json")
@@ -136,6 +144,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
             try:
                 response = requests.post(url, data=payload, timeout=60)
                 result = response.json()
+                print(f"[DEBUG] Single photo response (code {response.status_code}): {json.dumps(result, indent=2)}")
                 if "id" in result:
                     print(f"✓ ĐĂNG THÀNH CÔNG (1 ảnh)!")
                     return True
@@ -191,6 +200,7 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
         try:
             response = requests.post(url, data=payload, timeout=60)
             result = response.json()
+            print(f"[DEBUG] Album feed response (code {response.status_code}): {json.dumps(result, indent=2)}")
             
             if "id" in result:
                 print(f"✓ ĐĂNG THÀNH CÔNG (Album {len(media_ids)} ảnh)!")
@@ -201,6 +211,96 @@ def post_to_facebook(caption, product, image_paths, hashtag, link=None):
         except Exception as e:
             print(f"✗ Lỗi API Feed: {e}")
             return False
+
+# ================== GOOGLE DRIVE HELPERS ==================
+
+def get_drive_service():
+    """Build and return a Drive `service` object using the same service account creds."""
+    scopes = [
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/drive.readonly"
+    ]
+    creds = Credentials.from_service_account_file(
+        CREDENTIALS_JSON_PATH,
+        scopes=scopes
+    )
+    return build("drive", "v3", credentials=creds)
+
+
+def find_folder_id_by_name(name, parent_id=None):
+    """Search for a folder with the given name. Optionally restrict to a parent folder.
+    Returns the first match or None.
+    """
+    service = get_drive_service()
+    query = "mimeType = 'application/vnd.google-apps.folder'"
+    query += f" and name = '{name}'"
+    query += " and trashed = false"
+    if parent_id:
+        query += f" and '{parent_id}' in parents"
+    resp = service.files().list(q=query, fields="files(id, name)").execute()
+    items = resp.get("files", [])
+    if items:
+        return items[0]["id"]
+    return None
+
+
+def list_images_in_folder(folder_id):
+    """Return a list of Drive file dicts for images inside the specified folder."""
+    service = get_drive_service()
+    query = f"'{folder_id}' in parents and mimeType contains 'image/' and trashed = false"
+    resp = service.files().list(q=query, fields="files(id, name, mimeType)").execute()
+    return resp.get("files", [])
+
+
+def download_file(file_id, dest_path):
+    """Download a Drive file to the given local path."""
+    service = get_drive_service()
+    request = service.files().get_media(fileId=file_id)
+    fh = io.FileIO(dest_path, "wb")
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
+    return dest_path
+
+
+def get_images_for_category(category):
+    """Given a category string, look for a folder with that name under the
+    root folder (if configured) and download all image files.
+    Returns a list of local file paths.
+    """
+    if not category:
+        return []
+
+    parent = DRIVE_ROOT_FOLDER_ID or None
+    folder_id = find_folder_id_by_name(category, parent_id=parent)
+    if not folder_id:
+        print(f"⚠️ Không tìm thấy thư mục Drive cho category '{category}'")
+        return []
+
+    imgs = list_images_in_folder(folder_id)
+    if not imgs:
+        print(f"⚠️ Không tìm thấy ảnh nào trong thư mục '{category}'")
+        return []
+
+    local_paths = []
+    base_dir = os.path.join("downloaded_images", category)
+    os.makedirs(base_dir, exist_ok=True)
+    for f in imgs:
+        name = f["name"]
+        fid = f["id"]
+        dest = os.path.join(base_dir, name)
+        # only download if missing to avoid repeated API calls
+        if not os.path.exists(dest):
+            print(f"    Tải về {name}...")
+            try:
+                download_file(fid, dest)
+            except Exception as e:
+                print(f"    ✗ Lỗi khi tải {name}: {e}")
+                continue
+        local_paths.append(dest)
+    return local_paths
+
 
 # ================== CHẠY CHÍNH ==================
 def main():
@@ -234,16 +334,23 @@ def main():
     
     for index, row in df.iterrows():
         caption = str(row["Caption"]).strip()
-        image_raw = str(row["ImagePath"]).strip()
+        image_raw = str(row.get("ImagePath", "")).strip()
         hashtag = str(row.get("Hashtags", "")).strip()
         link = str(row.get("Link", "")).strip()
         product = str(row.get("Product", "")).strip()
+        category = str(row.get("Category", "")).strip()
         
-        # Tách nhiều ảnh bằng dấu phẩy hoặc xuống dòng
-        image_paths = [x.strip() for x in image_raw.replace('\n', ',').split(',') if x.strip()]
+        # nếu người dùng không cung cấp đường dẫn ảnh trực tiếp, thử lấy theo category
+        image_paths = []
+        if image_raw:
+            # Tách nhiều ảnh bằng dấu phẩy hoặc xuống dòng
+            image_paths = [x.strip() for x in image_raw.replace('\n', ',').split(',') if x.strip()]
+        elif category:
+            print(f"→ Không có ImagePath, lấy ảnh theo Category '{category}' từ Drive")
+            image_paths = get_images_for_category(category)
 
         if not caption or not image_paths:
-            print(f"Bỏ qua dòng {index + 2}: thiếu caption hoặc ảnh")
+            print(f"Bỏ qua dòng {index + 2}: thiếu caption hoặc ảnh (category={category})")
             continue
         
         print(f"\nXử lý bài: {caption[:50]}...")

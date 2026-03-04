@@ -12,7 +12,7 @@ CSV_FILE = "products.csv"
 
 def random_delay(a=3, b=6):
     time.sleep(random.uniform(a, b))
-
+DSAD
 def login_facebook(page):
     print("Logging in...")
     page.goto("https://www.facebook.com/login")

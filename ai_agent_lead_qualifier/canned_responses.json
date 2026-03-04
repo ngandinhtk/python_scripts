@@ -1,0 +1,567 @@
+[
+  {
+    "keywords": ["xin chào", "chao ban", "hello", "hi", "chào", "lời chào"],
+    "response": "Chào bạn! Mình là trợ lý ảo Bất Động Sản. Mình có thể giúp bạn tìm mua, bán, thuê hoặc cho thuê nhà đất. Bạn đang quan tâm đến nhu cầu nào ạ?",
+    "threshold": 90
+  },
+  {
+    "keywords": ["tạm biệt", "bye", "gặp lại sau", "kết thúc"],
+    "response": "Tạm biệt bạn! Cảm ơn bạn đã quan tâm. Hẹn gặp lại bạn sớm nhé!",
+    "threshold": 90
+  },
+  {
+    "keywords": ["cảm ơn", "thanks", "thank you", "cam on"],
+    "response": "Dạ không có chi ạ! Nếu cần thêm thông tin gì bạn cứ nhắn mình nhé. Chúc bạn một ngày tốt lành!",
+    "threshold": 90
+  },
+  {
+    "keywords": ["giá", "bao nhiêu tiền", "chi phí", "giá cả", "tài chính", "ngân sách"],
+    "response": "Giá cả phụ thuộc vào vị trí, diện tích và loại hình bất động sản. Bạn vui lòng cho mình biết khoảng ngân sách dự kiến để mình lọc căn phù hợp nhất nhé.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thuê", "tìm thuê", "cần thuê", "cho thuê"],
+    "response": "Bạn đang tìm thuê căn hộ chung cư, nhà phố hay văn phòng ạ? Và bạn muốn thuê ở khu vực nào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["mua", "tìm mua", "cần mua", "bán cho tôi"],
+    "response": "Bạn đang tìm mua nhà để ở hay đầu tư ạ? Bạn quan tâm khu vực nào và tài chính khoảng bao nhiêu?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["bán", "ký gửi", "muốn bán", "cần bán"],
+    "response": "Dạ, bên mình có nhận ký gửi mua bán nhà đất. Bạn vui lòng cung cấp thông tin về diện tích, vị trí, tình trạng pháp lý và giá mong muốn bán nhé.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["đặt lịch", "xem nhà", "tham quan", "coi nhà"],
+    "response": "Dạ được ạ. Bạn rảnh vào khung giờ nào trong tuần để mình sắp xếp nhân viên dẫn bạn đi xem nhà?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["liên hệ", "sđt", "số điện thoại", "gọi lại"],
+    "response": "Dạ, bạn vui lòng để lại số điện thoại, chuyên viên tư vấn bên mình sẽ gọi lại hỗ trợ bạn chi tiết ngay ạ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["chung cư", "căn hộ", "apartment"],
+    "response": "Bạn quan tâm đến căn hộ mấy phòng ngủ (1PN, 2PN, 3PN) và dự án nào cụ thể không ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["nhà phố", "nhà lẻ", "nhà riêng"],
+    "response": "Bạn thích nhà hẻm hay mặt tiền? Bạn cần nhà bao nhiêu tầng và diện tích khoảng bao nhiêu?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["đất nền", "đất thổ cư", "mua đất"],
+    "response": "Bạn tìm đất nền dự án hay đất dân? Diện tích và hướng đất bạn mong muốn là gì?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["biệt thự", "villa"],
+    "response": "Bên mình có nhiều biệt thự đơn lập và song lập. Bạn quan tâm khu vực nào (Thảo Điền, Phú Mỹ Hưng, v.v.)?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["quận 1", "q1", "trung tâm"],
+    "response": "Quận 1 là trung tâm thành phố, giá trị bất động sản rất cao. Bạn tìm mua/thuê ở phường nào của Quận 1 ạ?",
+    "threshold": 90
+  },
+  {
+    "keywords": ["quận 2", "q2", "thủ đức", "thảo điền", "an phú"],
+    "response": "Khu vực Quận 2 (TP. Thủ Đức) hiện rất phát triển, đặc biệt là Thảo Điền và Thủ Thiêm. Bạn quan tâm dự án nào ở đây không?",
+    "threshold": 90
+  },
+  {
+    "keywords": ["quận 7", "q7", "phú mỹ hưng"],
+    "response": "Quận 7 nổi tiếng với khu đô thị Phú Mỹ Hưng. Bạn tìm căn hộ hay nhà phố ở khu vực này?",
+    "threshold": 90
+  },
+  {
+    "keywords": ["bình thạnh", "q bình thạnh"],
+    "response": "Bình Thạnh giao thông thuận tiện đi Quận 1. Bạn tìm nhà tài chính khoảng bao nhiêu ở khu vực này?",
+    "threshold": 90
+  },
+  {
+    "keywords": ["pháp lý", "sổ đỏ", "sổ hồng", "giấy tờ"],
+    "response": "Pháp lý là yếu tố quan trọng nhất. Các sản phẩm bên mình giới thiệu đều có sổ hồng/sổ đỏ rõ ràng hoặc pháp lý minh bạch từ chủ đầu tư.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["vay ngân hàng", "trả góp", "hỗ trợ vay"],
+    "response": "Bên mình có liên kết với nhiều ngân hàng hỗ trợ vay lên đến 70-80% giá trị tài sản. Bạn có cần tư vấn bảng tính lãi suất không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["phí môi giới", "hoa hồng", "phí dịch vụ"],
+    "response": "Thông thường người bán/cho thuê sẽ chi trả phí môi giới. Khách mua/thuê được miễn phí dịch vụ tư vấn và dẫn đi xem nhà ạ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["hướng đông", "đông tứ trạch"],
+    "response": "Dạ, mình sẽ lọc các căn hướng Đông, Đông Nam, Nam, Bắc cho bạn. Bạn còn yêu cầu nào khác không?",
+    "threshold": 90
+  },
+  {
+    "keywords": ["hướng tây", "tây tứ trạch"],
+    "response": "Dạ, mình sẽ tìm các căn hướng Tây, Tây Bắc, Tây Nam, Đông Bắc phù hợp với tuổi của bạn.",
+    "threshold": 90
+  },
+  {
+    "keywords": ["1 phòng ngủ", "1pn", "studio"],
+    "response": "Căn 1 phòng ngủ hoặc Studio phù hợp cho 1-2 người ở. Bạn cần thuê hay mua ạ?",
+    "threshold": 88
+  },
+  {
+    "keywords": ["2 phòng ngủ", "2pn"],
+    "response": "Căn 2 phòng ngủ là lựa chọn phổ biến cho gia đình trẻ. Bạn cần diện tích khoảng bao nhiêu m2?",
+    "threshold": 88
+  },
+  {
+    "keywords": ["3 phòng ngủ", "3pn"],
+    "response": "Căn 3 phòng ngủ không gian rộng rãi. Bạn thích căn góc hay căn thường?",
+    "threshold": 88
+  },
+  {
+    "keywords": ["nội thất", "full option", "đầy đủ nội thất"],
+    "response": "Bạn muốn thuê căn đã có đầy đủ nội thất (chỉ việc xách vali vào ở) hay nhà trống để tự sắm đồ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["nhà trống", "nội thất cơ bản"],
+    "response": "Nhà trống hoặc nội thất cơ bản thường có giá mềm hơn. Bạn dự định khi nào chuyển vào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tiện ích", "hồ bơi", "gym"],
+    "response": "Hầu hết các chung cư cao cấp đều có hồ bơi, gym, công viên. Bạn có yêu cầu đặc biệt nào về tiện ích không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["an ninh", "bảo vệ"],
+    "response": "An ninh 24/7 là tiêu chuẩn của các dự án bên mình phân phối. Ra vào đều có thẻ từ kiểm soát.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["gần trường học", "trường quốc tế"],
+    "response": "Mình sẽ ưu tiên tìm các căn gần trường học để tiện đưa đón bé. Bạn cần gần trường cấp mấy hay trường quốc tế nào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["gần chợ", "siêu thị"],
+    "response": "Vị trí gần chợ/siêu thị rất tiện lợi cho sinh hoạt. Bạn muốn ở khu vực sầm uất hay yên tĩnh một chút?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["chính chủ", "không qua cò"],
+    "response": "Dạ, bên em làm việc trực tiếp với chủ nhà (chính chủ) để đàm phán giá tốt nhất cho anh/chị ạ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["đặt cọc", "cọc bao nhiêu"],
+    "response": "Thông thường thuê nhà cọc 2 tháng, mua bán cọc theo thỏa thuận (thường 5-10%). Bạn đang quan tâm căn nào ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["hợp đồng", "ký hợp đồng"],
+    "response": "Hợp đồng sẽ được công chứng (đối với mua bán) hoặc ký tay có người làm chứng (đối với thuê), đảm bảo pháp lý rõ ràng.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["đầu tư", "sinh lời"],
+    "response": "Nếu đầu tư, bạn thiên về lãi vốn (đất nền, nhà nát) hay dòng tiền (căn hộ cho thuê, shophouse) ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["shophouse", "mặt bằng"],
+    "response": "Bạn cần tìm Shophouse để kinh doanh ngành hàng gì? Diện tích sàn cần khoảng bao nhiêu?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["officetel", "văn phòng"],
+    "response": "Officetel vừa ở vừa làm văn phòng, đăng ký kinh doanh được. Bạn cần tìm ở quận nào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["penthouse", "áp mái"],
+    "response": "Penthouse là dòng sản phẩm đẳng cấp. Bạn cần view sông hay view thành phố ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["duplex", "thông tầng"],
+    "response": "Căn hộ Duplex có thiết kế thông tầng độc đáo. Ngân sách của bạn cho dòng này là bao nhiêu?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["hẻm xe hơi", "xe hơi vào nhà"],
+    "response": "Dạ, mình sẽ lọc các căn nhà hẻm xe hơi (tối thiểu 4-5m) cho bạn. Bạn cần khu vực nào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["mặt tiền", "kinh doanh"],
+    "response": "Nhà mặt tiền giá trị thương mại cao. Bạn mua để tự kinh doanh hay cho thuê lại?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["gấp", "cần ngay"],
+    "response": "Dạ, mình sẽ ưu tiên xử lý yêu cầu của bạn ngay lập tức. Bạn cho mình xin số điện thoại để liên hệ nhanh nhất nhé.",
+    "threshold": 90
+  },
+  {
+    "keywords": ["không mua", "huỷ", "thôi"],
+    "response": "Dạ vâng, không sao ạ. Khi nào có nhu cầu bạn cứ liên hệ lại nhé. Cảm ơn bạn!",
+    "threshold": 90
+  },
+  {
+    "keywords": ["sai thông tin", "nhầm"],
+    "response": "Xin lỗi bạn vì sự nhầm lẫn. Bạn vui lòng cung cấp lại thông tin chính xác giúp mình nhé.",
+    "threshold": 90
+  },
+  {
+    "keywords": ["quy hoạch", "lộ giới"],
+    "response": "Bên mình sẽ hỗ trợ check quy hoạch trên quận trước khi giao dịch. Bạn yên tâm nhé.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["ngập nước", "triều cường"],
+    "response": "Mình sẽ lưu ý tránh các tuyến đường hay ngập nước. Bạn muốn tìm nhà ở khu vực nào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["kẹt xe", "tắc đường"],
+    "response": "Vị trí giao thông thuận lợi là ưu tiên. Bạn thường đi làm ở quận mấy để mình tìm vị trí phù hợp?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thú cưng", "nuôi chó", "nuôi mèo"],
+    "response": "Một số chung cư có quy định về thú cưng. Bạn nuôi chó hay mèo để mình check với ban quản lý?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["phí quản lý", "phí dịch vụ"],
+    "response": "Phí quản lý tùy dự án (thường 10k-20k/m2). Phí này dùng cho bảo vệ, vệ sinh, thang máy, hồ bơi...",
+    "threshold": 85
+  },
+  {
+    "keywords": ["điện nước", "giá điện"],
+    "response": "Giá điện nước thường tính theo khung giá nhà nước. Nếu thuê phòng trọ dịch vụ thì có thể tính giá riêng.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["chỗ đậu xe", "bãi xe"],
+    "response": "Bạn cần chỗ đậu ô tô hay xe máy? Một số chung cư trung tâm chỗ đậu ô tô có thể hơi khan hiếm.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["ban công", "lô gia"],
+    "response": "Căn có ban công sẽ thoáng mát hơn. Bạn thích ban công hướng nào?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tầng cao", "view đẹp"],
+    "response": "Tầng cao view đẹp, không khí trong lành và ít ồn. Bạn ok với tầng cao không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tầng thấp", "tiện đi lại"],
+    "response": "Tầng thấp tiện di chuyển, phù hợp gia đình có người lớn tuổi. Bạn muốn tìm tầng khoảng bao nhiêu?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["căn góc", "2 mặt thoáng"],
+    "response": "Căn góc thường thoáng và nhiều ánh sáng tự nhiên hơn căn thường. Giá cũng sẽ nhỉnh hơn chút ạ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["nhà mới", "bóc tem"],
+    "response": "Bạn thích nhà mới 100% từ chủ đầu tư hay nhà phố mới xây ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["nhà cũ", "cải tạo"],
+    "response": "Mua nhà cũ về cải tạo (flip) là một cách đầu tư hay. Bạn tìm nhà nát hay nhà cũ vừa phải?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["gần bệnh viện", "y tế"],
+    "response": "Gần bệnh viện rất tiện chăm sóc sức khỏe. Bạn muốn gần bệnh viện nào (Chợ Rẫy, Y Dược, Vinmec...)?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["gần sân bay", "tân sơn nhất"],
+    "response": "Khu vực Tân Bình, Phú Nhuận, Gò Vấp sẽ gần sân bay. Bạn cần tìm nhà bán kính bao xa so với sân bay?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["người nước ngoài", "expat"],
+    "response": "Bên mình có nhiều căn hộ cho người nước ngoài thuê (đủ điều kiện pháp lý). Khách quốc tịch gì ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thuê dài hạn", "lâu dài"],
+    "response": "Chủ nhà rất thích khách thuê dài hạn (từ 1 năm trở lên). Bạn dự định thuê bao lâu?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thuê ngắn hạn", "theo tháng"],
+    "response": "Thuê ngắn hạn (dưới 6 tháng) giá thường cao hơn thuê năm. Bạn cần thuê chính xác mấy tháng?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["xuất hóa đơn", "vat"],
+    "response": "Nếu bạn thuê cho công ty, mình sẽ tìm những căn chủ nhà đồng ý xuất hóa đơn đỏ cho bạn.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["đăng ký kinh doanh", "giấy phép"],
+    "response": "Bạn cần tìm mặt bằng có chức năng kinh doanh hay văn phòng đại diện ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tạm trú", "đăng ký tạm trú"],
+    "response": "Chủ nhà có trách nhiệm hỗ trợ đăng ký tạm trú cho khách thuê. Bạn yên tâm vấn đề này nhé.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["phong thủy", "hợp tuổi"],
+    "response": "Phong thủy là yếu tố quan trọng. Bạn sinh năm bao nhiêu để mình xem hướng hợp với bạn?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["bếp", "nấu ăn"],
+    "response": "Bạn cần bếp mở hay bếp kín? Chung cư thường dùng bếp từ để an toàn PCCC.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["máy lạnh", "điều hòa"],
+    "response": "Các phòng ngủ thường có sẵn máy lạnh. Bạn kiểm tra xem máy còn mới và hoạt động tốt không nhé.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["nóng lạnh", "máy nước nóng"],
+    "response": "Hệ thống nước nóng lạnh là cơ bản. Bạn thích máy nước nóng trực tiếp hay gián tiếp?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["rèm cửa", "màn cửa"],
+    "response": "Rèm cửa giúp che nắng và đảm bảo riêng tư. Nếu chưa có, mình có thể thương lượng chủ nhà lắp thêm.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["giường tủ", "nội thất phòng ngủ"],
+    "response": "Bạn cần giường đôi (1m6, 1m8) hay giường đơn? Tủ quần áo âm tường hay tủ rời?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["sofa", "bàn ghế"],
+    "response": "Phòng khách có sofa sẽ tiện tiếp khách. Bạn thích sofa da, nỉ hay gỗ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tivi", "truyền hình"],
+    "response": "Chủ nhà có thể trang bị Tivi nếu bạn yêu cầu. Bạn cần Smart TV để xem Youtube/Netflix không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tủ lạnh", "máy giặt"],
+    "response": "Tủ lạnh và máy giặt là thiết bị thiết yếu. Bạn cần loại dung tích lớn cho gia đình đông người không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["khóa vân tay", "smart lock"],
+    "response": "Khóa vân tay rất an toàn và tiện lợi, không lo quên chìa khóa. Bạn thích tính năng này không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["pccc", "cháy nổ"],
+    "response": "Hệ thống PCCC của tòa nhà được kiểm định định kỳ. Căn hộ cũng có đầu báo khói tự động.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thang máy", "thẻ từ"],
+    "response": "Thang máy sử dụng thẻ từ phân tầng, đảm bảo an ninh, người lạ không tự ý lên được.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["rác", "vệ sinh"],
+    "response": "Phòng rác được thu gom và vệ sinh hàng ngày, đảm bảo hành lang luôn sạch sẽ, không mùi.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["cây xanh", "công viên"],
+    "response": "Mảng xanh và công viên nội khu giúp không khí trong lành, rất tốt cho sức khỏe.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["sân chơi", "trẻ em"],
+    "response": "Khu vui chơi trẻ em an toàn là điểm cộng lớn cho gia đình có con nhỏ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["bbq", "nướng thịt"],
+    "response": "Cuối tuần bạn có thể tổ chức tiệc nướng cùng gia đình tại khu BBQ của dự án.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thư viện", "đọc sách"],
+    "response": "Phòng đọc sách yên tĩnh, wifi mạnh, rất phù hợp để làm việc hoặc học tập.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["cửa hàng tiện lợi", "siêu thị mini"],
+    "response": "Dưới chân tòa nhà có Vinmart, 7-Eleven... mở cửa 24/7, rất tiện mua sắm đồ lặt vặt.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["cafe", "coffee"],
+    "response": "Có nhiều quán cafe đẹp ngay trong khuôn viên, bạn có thể tiếp khách hoặc làm việc tại đó.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["spa", "làm đẹp"],
+    "response": "Các dịch vụ Spa, gội đầu, nail thường có sẵn ở khu shophouse tầng trệt.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["nhà thuốc", "pharmacy"],
+    "response": "Nhà thuốc Pharmacity/Long Châu thường có mặt ngay tại các khu dân cư đông đúc.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["ngân hàng", "atm"],
+    "response": "Xung quanh có nhiều chi nhánh ngân hàng và cây ATM, rất tiện giao dịch tài chính.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["lead_saved_confirmation"],
+    "response": "Tuyệt vời! Thông tin của bạn đã được lưu vào hệ thống. Chuyên viên tư vấn sẽ liên hệ với bạn trong thời gian sớm nhất. Cảm ơn bạn đã tin tưởng!",
+    "threshold": 95
+  },
+  {
+    "keywords": ["bảo hành", "bảo trì"],
+    "response": "Đối với nhà mới, chủ đầu tư thường bảo hành kết cấu 5 năm. Đối với thiết bị nội thất thì theo hãng.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["đường rộng", "lộ giới"],
+    "response": "Đường trước nhà rộng bao nhiêu mét ạ? Hai xe hơi có tránh nhau được không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["khu dân cư", "hàng xóm"],
+    "response": "Khu dân cư ở đây dân trí cao, yên tĩnh và thân thiện. Bạn thích môi trường sống như vậy chứ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["ngập", "triều cường"],
+    "response": "Khu vực này cốt nền cao, hệ thống thoát nước tốt nên rất hiếm khi bị ngập, kể cả khi mưa lớn.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["pháp lý dự án", "1/500"],
+    "response": "Dự án đã có quy hoạch 1/500 và giấy phép xây dựng đầy đủ. Bạn yên tâm về pháp lý nhé.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tiến độ", "xây dựng"],
+    "response": "Dự án đang thi công đúng tiến độ, dự kiến bàn giao vào quý tới. Bạn muốn đi xem thực tế công trường không?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["bàn giao", "nhận nhà"],
+    "response": "Thời gian bàn giao dự kiến là khi nào ạ? Bạn cần nhận nhà ở ngay hay có thể chờ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["vật liệu", "hoàn thiện"],
+    "response": "Nhà được bàn giao hoàn thiện cơ bản với vật liệu cao cấp (sàn gỗ, thiết bị vệ sinh Toto/Kohler...).",
+    "threshold": 85
+  },
+  {
+    "keywords": ["chủ đầu tư", "uy tín"],
+    "response": "Chủ đầu tư dự án này rất uy tín, đã có nhiều dự án thành công trên thị trường (Vinhomes, Novaland, Khang Điền...).",
+    "threshold": 85
+  },
+  {
+    "keywords": ["ban quản lý", "savills", "cbre"],
+    "response": "Tòa nhà được vận hành bởi đơn vị quản lý chuyên nghiệp (Savills/CBRE/JLL), dịch vụ rất tốt.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thẻ cư dân", "tiện ích nội khu"],
+    "response": "Chỉ cư dân có thẻ mới được sử dụng các tiện ích nội khu (hồ bơi, gym), đảm bảo riêng tư.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["khách tham quan", "bạn bè"],
+    "response": "Bạn bè đến chơi có thể gửi xe dưới hầm và đăng ký tại lễ tân để lên căn hộ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["giờ giấc", "tự do"],
+    "response": "Giờ giấc tự do, bạn có chìa khóa/thẻ từ riêng, không chung chủ.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["chung chủ", "ở ghép"],
+    "response": "Bạn muốn tìm phòng ở ghép hay ở riêng biệt hoàn toàn?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["điện 3 pha", "sản xuất"],
+    "response": "Nếu bạn thuê xưởng sản xuất, mình sẽ tìm nơi có điện 3 pha cho bạn.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["container", "xe tải"],
+    "response": "Đường vào kho xưởng có cho xe Container hoặc xe tải lớn vào không ạ?",
+    "threshold": 85
+  },
+  {
+    "keywords": ["cống", "thoát nước"],
+    "response": "Hệ thống thoát nước tốt, không lo ngập úng hay mùi hôi.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["móng", "kết cấu"],
+    "response": "Nhà được xây dựng kiên cố, móng băng/móng cọc chắc chắn, có thể lên thêm tầng.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tường riêng", "tường chung"],
+    "response": "Nhà tường riêng, cột riêng, không chung đụng với nhà hàng xóm.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["hoàn công", "sổ hồng hoàn công"],
+    "response": "Nhà đã hoàn công đầy đủ, diện tích trên sổ khớp với thực tế.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thuế phí", "sang tên"],
+    "response": "Thuế phí sang tên thường do bên bán chịu (thuế TNCN) và bên mua chịu (lệ phí trước bạ), hoặc thỏa thuận.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["công chứng", "phòng công chứng"],
+    "response": "Giao dịch sẽ được thực hiện tại phòng công chứng nhà nước hoặc tư nhân uy tín.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["vi bằng", "giấy tay"],
+    "response": "Mua bán vi bằng có rủi ro pháp lý cao. Bên mình khuyên bạn nên chọn nhà có sổ hồng riêng.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["tranh chấp", "kiện tụng"],
+    "response": "Bên mình cam kết kiểm tra tình trạng tranh chấp của tài sản trước khi giao dịch.",
+    "threshold": 85
+  },
+  {
+    "keywords": ["thừa kế", "di chúc"],
+    "response": "Nếu tài sản là thừa kế, cần sự đồng thuận của tất cả những người được thừa kế khi bán.",
+    "threshold": 85
+  }
+]

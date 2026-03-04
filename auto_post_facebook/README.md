@@ -56,3 +56,14 @@ print(post_photo_to_group(group, 'Caption here', 'https://example.com/image.jpg'
 - If you receive permission errors, check that the token includes `publish_to_groups` and that the user is allowed to post to the group.
 - Long-lived tokens: exchange short-lived user tokens for long-lived tokens via the OAuth endpoints; cycles and refresh rules apply.
 - Respect Facebook policy: do not spam and obtain user consent where necessary.
+
+## Using Google Drive for Images
+
+You can store image files in Google Drive organised by category and let the script download what it needs automatically. To enable:
+
+1. Add `DRIVE_ROOT_FOLDER_ID` to your `.env` (or environment). This should be the ID of a parent folder that contains subfolders named after each category.
+2. Within Drive, create one folder per category and upload images there.
+3. If a row in the sheet has an empty `ImagePath` but a `Category` value, the script will look up the folder and download all images inside. Downloaded files are placed under `downloaded_images/<Category>/`.
+4. Make sure the service account JSON key has access to the Drive folders (share the folder with the service account email).
+
+You also need the additional Python dependencies listed in `requirements.txt` (`google-api-python-client` etc.).
