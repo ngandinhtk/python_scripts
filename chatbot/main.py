@@ -71,3 +71,10 @@ if os.path.exists(static_dir):
     @app.get("/", include_in_schema=False)
     async def serve_ui():
         return FileResponse(os.path.join(static_dir, "index.html"))
+else:
+    # Fallback to repository root index.html if present
+    root_index = os.path.join(os.path.dirname(__file__), "index.html")
+    if os.path.exists(root_index):
+        @app.get("/", include_in_schema=False)
+        async def serve_root_ui():
+            return FileResponse(root_index)

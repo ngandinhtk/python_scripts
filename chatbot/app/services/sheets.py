@@ -54,11 +54,11 @@ class GoogleSheetsService:
         if sheet_id not in self._cache:
             return False
         age = datetime.now() - self._cache[sheet_id]["synced_at"]
-        return age < timedelta(seconds=settings.SHEETS_SYNC_INTERVAL)
+        return age < timedelta(seconds=getattr(settings, 'SHEETS_SYNC_INTERVAL', 300))
 
     def get_customers(self) -> List[Dict]:
         """Lấy danh sách khách hàng từ cache hoặc Sheet."""
-        sid = settings.SHEET_CUSTOMERS_ID
+        sid = getattr(settings, 'SHEET_CUSTOMERS_ID', None)
         if not sid:
             return []
         if not self._is_cache_valid(sid):
@@ -67,7 +67,7 @@ class GoogleSheetsService:
 
     def get_products(self) -> List[Dict]:
         """Lấy danh sách sản phẩm/dịch vụ."""
-        sid = settings.SHEET_PRODUCTS_ID
+        sid = getattr(settings, 'SHEET_PRODUCTS_ID', None)
         if not sid:
             return []
         if not self._is_cache_valid(sid):
@@ -76,7 +76,7 @@ class GoogleSheetsService:
 
     def get_faq(self) -> List[Dict]:
         """Lấy danh sách câu hỏi thường gặp."""
-        sid = settings.SHEET_FAQ_ID
+        sid = getattr(settings, 'SHEET_FAQ_ID', None)
         if not sid:
             return []
         if not self._is_cache_valid(sid):
@@ -162,10 +162,10 @@ class GoogleSheetsService:
 
     async def start_auto_sync(self):
         """Vòng lặp tự động sync theo SHEETS_SYNC_INTERVAL."""
-        logger.info("sheets.auto_sync_started", interval=settings.SHEETS_SYNC_INTERVAL)
+        logger.info("sheets.auto_sync_started", interval=getattr(settings, 'SHEETS_SYNC_INTERVAL', 300))
         while True:
             await self.sync_to_vector_db()
-            await asyncio.sleep(settings.SHEETS_SYNC_INTERVAL)
+            await asyncio.sleep(getattr(settings, 'SHEETS_SYNC_INTERVAL', 300))
 
 
 sheets_service = GoogleSheetsService()
