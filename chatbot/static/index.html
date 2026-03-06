@@ -203,6 +203,7 @@
     transition: opacity 0.3s;
   }
   .toast.show { opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -339,7 +340,11 @@
 
     } catch (e) {
       removeTyping();
-      addBotMessage('Không thể kết nối đến server. Vui lòng thử lại.');
+      let errorMsg = 'Không thể kết nối đến server. Vui lòng thử lại và chắc chắn rằng server backend đang chạy.';
+      if (window.location.protocol === 'file:') {
+        errorMsg = 'Lỗi kết nối: Vui lòng không mở file HTML trực tiếp. Bạn cần chạy ứng dụng qua server và truy cập bằng địa chỉ http://localhost:8000 (hoặc địa chỉ tương tự).';
+      }
+      addBotMessage(errorMsg);
     } finally {
       isStreaming = false;
       document.getElementById('sendBtn').disabled = false;

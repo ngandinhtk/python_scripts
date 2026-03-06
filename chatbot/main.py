@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -71,6 +71,13 @@ if os.path.exists(static_dir):
     @app.get("/", include_in_schema=False)
     async def serve_ui():
         return FileResponse(os.path.join(static_dir, "index.html"))
+
+    @app.get("/admin", include_in_schema=False)
+    async def serve_admin_ui():
+        admin_page = os.path.join(static_dir, "admin.html")
+        if os.path.exists(admin_page):
+            return FileResponse(admin_page)
+        raise HTTPException(status_code=404, detail="Admin page not found")
 else:
     # Fallback to repository root index.html if present
     root_index = os.path.join(os.path.dirname(__file__), "index.html")

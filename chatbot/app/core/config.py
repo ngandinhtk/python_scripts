@@ -15,9 +15,11 @@ class Settings(BaseSettings):
     
     # Google Sheets settings
     GOOGLE_SERVICE_ACCOUNT_FILE: str = "credentials.json"
+    GOOGLE_CREDENTIALS_JSON: str = os.getenv("GOOGLE_CREDENTIALS_JSON", "")
     SHEET_CUSTOMERS_ID: str = os.getenv("SHEET_CUSTOMERS_ID", "")
     SHEET_PRODUCTS_ID: str = os.getenv("SHEET_PRODUCTS_ID", "")
     SHEET_FAQ_ID: str = os.getenv("SHEET_FAQ_ID", "")
+    SHEET_LOGS_ID: str = os.getenv("SHEET_LOGS_ID", "")
     
     # API settings
     API_V1_PREFIX: str = "/api/v1"
@@ -26,7 +28,7 @@ class Settings(BaseSettings):
     CHROMA_COLLECTION_NAME: str = "chatbot_documents"
     
     # System prompt for LLM
-    SYSTEM_PROMPT: str = "Bạn là một trợ lý AI hữu ích. Hãy luôn trả lời bằng tiếng Việt một cách thân thiện và chuyên nghiệp."
+    SYSTEM_PROMPT: str = "Bạn là một trợ lý AI hữu ích. Luôn trả lời bằng tiếng Việt một cách thân thiện và chuyên nghiệp. Toàn bộ câu trả lời của bạn PHẢI được viết bằng tiếng Việt."
     
     # DeepSeek API settings
     DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")

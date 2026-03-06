@@ -43,7 +43,7 @@ class ConversationMemory:
             msg = MessageRecord(session_id=session_id, role=role, content=content)
             session.add(msg)
             await session.commit()
-        logger.info("memory.add", session_id=session_id, role=role)
+        logger.debug("memory.add", session_id=session_id, role=role)
 
     async def get_history(self, session_id: str) -> List[Dict[str, str]]:
         async with AsyncSessionLocal() as session:
