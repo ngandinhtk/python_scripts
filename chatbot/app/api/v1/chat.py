@@ -7,12 +7,13 @@ from app.services.retrieval import retrieval_service
 from app.services.llm import llm_service
 from app.services.sheets import sheets_service
 from app.core.config import settings
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 import uuid
 import re
 import json
 
 router = APIRouter()
+logger = StructuredLogger(__name__)
 
 
 class Message(BaseModel):
@@ -48,10 +49,10 @@ async def chat(message: Message, background_tasks: BackgroundTasks):
         # Prompt hướng dẫn trích xuất thông tin
         extraction_instruction = (
             "\n\n--- HƯỚNG DẪN TRÍCH XUẤT THÔNG TIN ---\n"
-            "Nếu người dùng cung cấp thông tin cá nhân (Tên, Số điện thoại, Email, Địa chỉ) để liên hệ, mua hàng hoặc CẬP NHẬT thông tin:\n"
+            "Nếu người dùng cung cấp thông tin cá nhân (Họ và Tên, Số điện thoại, Email, Địa chỉ) để liên hệ, mua hàng hoặc CẬP NHẬT thông tin:\n"
             "1. Hãy trả lời họ một cách tự nhiên.\n"
             "2. Ở CUỐI CÙNG của câu trả lời, hãy thêm một khối JSON đặc biệt theo định dạng sau để hệ thống ghi nhận:\n"
-            "   <<<CUSTOMER_DATA: {\"Tên\": \"...\", \"Số điện thoại\": \"...\", \"Email\": \"...\", \"Địa chỉ\": \"...\"}>>>\n"
+            "   <<<CUSTOMER_DATA: {\"Họ và Tên\": \"...\", \"Số điện thoại\": \"...\", \"Email\": \"...\", \"Địa chỉ\": \"...\"}>>>\n"
             "   - Hệ thống sẽ tự động dùng 'Số điện thoại' hoặc 'Email' để tìm và CẬP NHẬT nếu khách hàng đã tồn tại, hoặc TẠO MỚI nếu chưa có.\n"
             "   - Chỉ điền các trường có thông tin, bỏ qua nếu không có. Tên trường phải chính xác như ví dụ."
         )

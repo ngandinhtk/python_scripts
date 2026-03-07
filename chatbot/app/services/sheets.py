@@ -2,7 +2,7 @@
 Google Sheets Service
 - Đọc dữ liệu từ 3 sheet: Khách hàng, Sản phẩm, FAQ
 - Tự động sync vào Chroma vector DB để chatbot có thể tìm kiếm
-- Cache dữ Ku trong bộ nhớ để tránh gọi API liên tục
+- Cache dữ liệu trong bộ nhớ để tránh gọi API liên tục
 """
 import gspread
 from google.oauth2.service_account import Credentials
@@ -10,9 +10,10 @@ from typing import List, Dict, Optional, Any
 import json
 import os
 import asyncio
+import uuid
 from datetime import datetime, timedelta
 from app.core.config import settings
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 from functools import partial
 
 
@@ -21,6 +22,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
+logger = StructuredLogger(__name__)
 
 class GoogleSheetsService:
     def __init__(self):
@@ -59,36 +61,42 @@ class GoogleSheetsService:
         logger.info("sheets.auth.file")
         return self._client
 
-    def _get_sheet(self, sheet_id: str) -> Optional[gspread.Worksheet]:
+    def _get_sheet(self, sheet_id: str, sheet_name: str = "") -> Optional[gspread.Worksheet]:
         """Lấy đối tượng worksheet từ sheet ID."""
         if not sheet_id:
-            logger.warning("sheets.get_sheet.no_id", msg="Sheet ID is not provided.")
+            logger.warning("sheets.get_sheet.no_id", detail="Sheet ID is not provided.")
             return None
         try:
             client = self._get_client()
-            sheet = client.open_by_key(sheet_id).sheet1
-            return sheet
+            spreadsheet = client.open_by_key(sheet_id)
+            if sheet_name:
+                return spreadsheet.worksheet(sheet_name)
+            else:
+                return spreadsheet.sheet1
         except gspread.exceptions.SpreadsheetNotFound:
             logger.error("sheets.get_sheet.not_found", sheet_id=sheet_id)
+            return None
+        except gspread.exceptions.WorksheetNotFound:
+            logger.error("sheets.get_sheet.worksheet_not_found", sheet_id=sheet_id, sheet_name=sheet_name)
             return None
         except Exception as e:
             logger.error("sheets.get_sheet.error", sheet_id=sheet_id, error=str(e))
             return None
 
-    def _fetch_sheet(self, sheet_id: str) -> List[Dict]:
+    def _fetch_sheet(self, sheet_id: str, sheet_name: str = "") -> List[Dict]:
         """Đọc toàn bộ dữ liệu từ một Sheet (row đầu = header)."""
-        sheet = self._get_sheet(sheet_id)
+        sheet = self._get_sheet(sheet_id, sheet_name)
         if not sheet:
             return []
         rows = sheet.get_all_records()
         logger.info("sheets.fetched", sheet_id=sheet_id[:8], rows=len(rows))
         return rows
 
-    def append_row(self, sheet_id: str, row_values: List[Any]):
+    def append_row(self, sheet_id: str, row_values: List[Any], sheet_name: str = ""):
         """Ghi thêm một dòng vào cuối sheet."""
-        sheet = self._get_sheet(sheet_id)
+        sheet = self._get_sheet(sheet_id, sheet_name)
         if not sheet:
-            logger.error("sheets.append_row.failed", sheet_id=sheet_id, msg="Sheet not found or accessible.")
+            logger.error("sheets.append_row.failed", sheet_id=sheet_id, detail="Sheet not found or accessible.")
             return
         try:
             sheet.append_row(row_values, value_input_option='USER_ENTERED')
@@ -96,11 +104,11 @@ class GoogleSheetsService:
         except Exception as e:
             logger.error("sheets.append_row.error", sheet_id=sheet_id, error=str(e))
 
-    def update_row(self, sheet_id: str, row_index: int, row_values: List[Any]):
+    def update_row(self, sheet_id: str, row_index: int, row_values: List[Any], sheet_name: str = ""):
         """Cập nhật một dòng cụ thể trong sheet."""
-        sheet = self._get_sheet(sheet_id)
+        sheet = self._get_sheet(sheet_id, sheet_name)
         if not sheet:
-            logger.error("sheets.update_row.failed", sheet_id=sheet_id, msg="Sheet not found or accessible.")
+            logger.error("sheets.update_row.failed", sheet_id=sheet_id, detail="Sheet not found or accessible.")
             return
         try:
             # gspread row indices are 1-based. We update the whole row.
@@ -115,40 +123,50 @@ class GoogleSheetsService:
         age = datetime.now() - self._cache[sheet_id]["synced_at"]
         return age < timedelta(seconds=getattr(settings, 'SHEETS_SYNC_INTERVAL', 300))
 
-    def get_customers(self) -> List[Dict]:
+    async def get_customers(self) -> List[Dict]:
         """Lấy danh sách khách hàng từ cache hoặc Sheet."""
         sid = getattr(settings, 'SHEET_CUSTOMERS_ID', None)
+        sname = getattr(settings, 'SHEET_CUSTOMERS_NAME', "")
         if not sid:
             return []
         if not self._is_cache_valid(sid):
-            self._cache[sid] = {"data": self._fetch_sheet(sid), "synced_at": datetime.now()}
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, self._fetch_sheet, sid, sname)
+            self._cache[sid] = {"data": data, "synced_at": datetime.now()}
         return self._cache[sid]["data"]
 
-    def get_products(self) -> List[Dict]:
+    async def get_products(self) -> List[Dict]:
         """Lấy danh sách sản phẩm/dịch vụ."""
         sid = getattr(settings, 'SHEET_PRODUCTS_ID', None)
+        sname = getattr(settings, 'SHEET_PRODUCTS_NAME', "")
         if not sid:
             return []
         if not self._is_cache_valid(sid):
-            self._cache[sid] = {"data": self._fetch_sheet(sid), "synced_at": datetime.now()}
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, self._fetch_sheet, sid, sname)
+            self._cache[sid] = {"data": data, "synced_at": datetime.now()}
         return self._cache[sid]["data"]
 
-    def get_faq(self) -> List[Dict]:
+    async def get_faq(self) -> List[Dict]:
         """Lấy danh sách câu hỏi thường gặp."""
         sid = getattr(settings, 'SHEET_FAQ_ID', None)
+        sname = getattr(settings, 'SHEET_FAQ_NAME', "")
         if not sid:
             return []
         if not self._is_cache_valid(sid):
-            self._cache[sid] = {"data": self._fetch_sheet(sid), "synced_at": datetime.now()}
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, self._fetch_sheet, sid, sname)
+            self._cache[sid] = {"data": data, "synced_at": datetime.now()}
         return self._cache[sid]["data"]
 
-    def find_customer(self, query: str) -> Optional[Dict]:
+    async def find_customer(self, query: str) -> Optional[Dict]:
         """
         `Tìm khách hàng theo tên, email, hoặc số điện thoại. 
         Tìm kiếm case-insensitive, partial match.`
         """
         q = query.lower().strip()
-        for customer in self.get_customers():
+        customers = await self.get_customers()
+        for customer in customers:
             for value in customer.values():
                 if q in str(value).lower():
                     return customer
@@ -157,6 +175,7 @@ class GoogleSheetsService:
     async def log_chat_message(self, session_id: str, role: str, content: str):
         """Lưu tin nhắn chat vào Google Sheet."""
         sheet_id = settings.SHEET_LOGS_ID
+        sheet_name = getattr(settings, 'SHEET_LOGS_NAME', "") # Nếu bạn muốn cấu hình tên sheet logs
         if not sheet_id:
             return  # Không làm gì nếu không có sheet logs ID
 
@@ -165,12 +184,13 @@ class GoogleSheetsService:
 
         # Chạy tác vụ I/O trong thread pool để không block event loop
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self.append_row, sheet_id, row)
+        await loop.run_in_executor(None, self.append_row, sheet_id, row, sheet_name)
 
     async def add_customer(self, customer_data: Dict[str, Any]):
         """Thêm hoặc cập nhật thông tin khách hàng dựa trên SĐT hoặc Email."""
         sheet_id = settings.SHEET_CUSTOMERS_ID
-        sheet = self._get_sheet(sheet_id)
+        sheet_name = getattr(settings, 'SHEET_CUSTOMERS_NAME', "")
+        sheet = self._get_sheet(sheet_id, sheet_name)
         if not sheet:
             raise ValueError("Không thể truy cập sheet khách hàng.")
 
@@ -221,13 +241,29 @@ class GoogleSheetsService:
                     existing_data[key] = value
             
             updated_row_values = [existing_data.get(header, "") for header in headers]
-            await loop.run_in_executor(None, self.update_row, sheet_id, row_index, updated_row_values)
+            await loop.run_in_executor(None, self.update_row, sheet_id, row_index, updated_row_values, sheet_name)
             logger.info("sheets.customer_updated", identifier=f"{identifier_key}={identifier_value}")
         else:
             # --- THÊM MỚI KHÁCH HÀNG ---
+            # Tự động tạo Mã KH nếu có cột "Mã KH" trong header nhưng chưa có dữ liệu
+            if "Mã KH" in headers and not customer_data.get("Mã KH"):
+                # Tạo mã KH: KH + 6 ký tự random (ví dụ: KH1A2B3C)
+                customer_data["Mã KH"] = f"KH{uuid.uuid4().hex[:6].upper()}"
+            
+            # Tự động thêm Ngày tạo nếu có cột này trong header
+            if "Ngày tạo" in headers and not customer_data.get("Ngày tạo"):
+                customer_data["Ngày tạo"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
             new_row_values = [customer_data.get(header, "") for header in headers]
-            await loop.run_in_executor(None, self.append_row, sheet_id, new_row_values)
+            await loop.run_in_executor(None, self.append_row, sheet_id, new_row_values, sheet_name)
             logger.info("sheets.customer_added", data=customer_data)
+            
+            # Gửi tin nhắn Zalo chào mừng (nếu có SĐT)
+            if "Số điện thoại" in customer_data and customer_data["Số điện thoại"]:
+                from app.services.zalo import zalo_service
+                # Gửi tin nhắn ZNS
+                cust_name = customer_data.get("Họ và Tên") or customer_data.get("Tên") or "Quý khách"
+                await zalo_service.send_zns(customer_data["Số điện thoại"], cust_name, customer_data.get("Mã KH", ""))
 
         # Vô hiệu hóa cache để lần đọc tiếp theo sẽ lấy dữ liệu mới
         if sheet_id in self._cache:
@@ -236,25 +272,28 @@ class GoogleSheetsService:
 
     # --- Chuyển dữ liệu thành văn bản để nhúng vào vector DB ---
 
-    def customers_to_texts(self) -> List[str]:
+    async def customers_to_texts(self) -> List[str]:
         texts = []
-        for c in self.get_customers():
+        customers = await self.get_customers()
+        for c in customers:
             parts = [f"{k}: {v}" for k, v in c.items() if v]
             if parts:
                 texts.append("Khách hàng — " + " | ".join(parts))
         return texts
 
-    def products_to_texts(self) -> List[str]:
+    async def products_to_texts(self) -> List[str]:
         texts = []
-        for p in self.get_products():
+        products = await self.get_products()
+        for p in products:
             parts = [f"{k}: {v}" for k, v in p.items() if v]
             if parts:
                 texts.append("Sản phẩm/Dịch vụ — " + " | ".join(parts))
         return texts
 
-    def faq_to_texts(self) -> List[str]:
+    async def faq_to_texts(self) -> List[str]:
         texts = []
-        for f in self.get_faq():
+        faq = await self.get_faq()
+        for f in faq:
             # Tự động detect cột "question" / "answer" hoặc dùng cột đầu tiên
             keys = list(f.keys())
             q_key = next((k for k in keys if "câu hỏi" in k.lower() or "question" in k.lower()), keys[0] if keys else None)
@@ -273,17 +312,17 @@ class GoogleSheetsService:
 
         try:
             # Khách hàng
-            c_texts = self.customers_to_texts()
+            c_texts = await self.customers_to_texts()
             all_texts += c_texts
             all_meta += [{"source": "customers"} for _ in c_texts]
 
             # Sản phẩm
-            p_texts = self.products_to_texts()
+            p_texts = await self.products_to_texts()
             all_texts += p_texts
             all_meta += [{"source": "products"} for _ in p_texts]
 
             # FAQ
-            f_texts = self.faq_to_texts()
+            f_texts = await self.faq_to_texts()
             all_texts += f_texts
             all_meta += [{"source": "faq"} for _ in f_texts]
 
@@ -292,7 +331,7 @@ class GoogleSheetsService:
                 logger.info("sheets.synced", total=len(all_texts),
                             customers=len(c_texts), products=len(p_texts), faq=len(f_texts))
             else:
-                logger.warning("sheets.empty", msg="Không có dữ liệu để sync — kiểm tra SHEET_*_ID trong .env")
+                logger.warning("sheets.empty", detail="Không có dữ liệu để sync — kiểm tra SHEET_*_ID trong .env")
 
         except FileNotFoundError as e:
             logger.warning("sheets.no_credentials", error=str(e))
@@ -305,6 +344,5 @@ class GoogleSheetsService:
         while True:
             await self.sync_to_vector_db()
             await asyncio.sleep(getattr(settings, 'SHEETS_SYNC_INTERVAL', 300))
-
 
 sheets_service = GoogleSheetsService()

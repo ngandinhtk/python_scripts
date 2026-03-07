@@ -7,13 +7,14 @@ from contextlib import asynccontextmanager
 import os
 
 from app.core.config import settings
-from app.core.logging import setup_logging, logger
+from app.core.logging import setup_logging, StructuredLogger
 from app.core.exceptions import ChatbotException, chatbot_exception_handler
 from app.services.memory import init_db
 from app.services.sheets import sheets_service
 from app.api.v1 import chat, knowledge, health, sheets
 
 
+logger = StructuredLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()

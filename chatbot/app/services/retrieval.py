@@ -4,10 +4,11 @@ Retrieval service for vector database operations.
 import chromadb
 import hashlib
 from app.core.config import settings
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 from typing import List, Dict, Optional
 from fastapi.concurrency import run_in_threadpool
 
+logger = StructuredLogger(__name__)
 
 class RetrievalService:
     def __init__(self):

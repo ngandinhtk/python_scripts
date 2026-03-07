@@ -7,12 +7,13 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy import Column, String, Text, DateTime, select
 from sqlalchemy.sql import func
 from app.core.config import settings
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 import uuid
 
 engine = create_async_engine(settings.DATABASE_URL, echo=False)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
+logger = StructuredLogger(__name__)
 
 class Base(DeclarativeBase):
     pass

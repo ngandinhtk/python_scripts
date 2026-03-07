@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     SHEET_PRODUCTS_ID: str = os.getenv("SHEET_PRODUCTS_ID", "")
     SHEET_FAQ_ID: str = os.getenv("SHEET_FAQ_ID", "")
     SHEET_LOGS_ID: str = os.getenv("SHEET_LOGS_ID", "")
+
+    # Google Sheets Worksheet Names (Optional - for single spreadsheet usage)
+    SHEET_CUSTOMERS_NAME: str = os.getenv("SHEET_CUSTOMERS_NAME", "")
+    SHEET_PRODUCTS_NAME: str = os.getenv("SHEET_PRODUCTS_NAME", "")
+    SHEET_FAQ_NAME: str = os.getenv("SHEET_FAQ_NAME", "")
     
     # API settings
     API_V1_PREFIX: str = "/api/v1"
@@ -39,6 +44,10 @@ class Settings(BaseSettings):
     
     # Google Sheets auto-sync interval (seconds)
     SHEETS_SYNC_INTERVAL: int = 300
+    
+    # Zalo ZNS settings
+    ZALO_ACCESS_TOKEN: str = os.getenv("ZALO_ACCESS_TOKEN", "")
+    ZALO_TEMPLATE_ID: str = os.getenv("ZALO_TEMPLATE_ID", "")
     
     class Config:
         env_file = ".env"

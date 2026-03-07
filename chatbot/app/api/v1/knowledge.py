@@ -1,9 +1,10 @@
 """Knowledge base endpoints."""
 from fastapi import APIRouter, HTTPException
 from app.services.retrieval import retrieval_service
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 
 router = APIRouter()
+logger = StructuredLogger(__name__)
 
 
 @router.get("/search")

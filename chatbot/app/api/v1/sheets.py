@@ -3,18 +3,21 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 from typing import Optional
 from app.services.sheets import sheets_service
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 
 router = APIRouter()
+logger = StructuredLogger(__name__)
 
 
 class NewCustomer(BaseModel):
     """Mô hình dữ liệu để tạo khách hàng mới."""
-    Tên: str = Field(..., example="Trần Văn B")
+    Ten: Optional[str] = Field(None, alias="Họ và Tên", example="Trần Văn B")
+    Ma_KH: Optional[str] = Field(None, alias="Mã KH", example="KH123456")
     Email: Optional[str] = Field(None, example="b.tran@example.com")
     So_dien_thoai: Optional[str] = Field(None, alias="Số điện thoại", example="0987654321")
     Dia_chi: Optional[str] = Field(None, alias="Địa chỉ", example="Đà Nẵng")
     Ghi_chu: Optional[str] = Field(None, alias="Ghi chú", example="Khách hàng tiềm năng")
+    Ngay_tao: Optional[str] = Field(None, alias="Ngày tạo", example="2023-10-27 10:00:00")
 
     class Config:
         extra = 'allow'
@@ -32,7 +35,7 @@ async def add_customer(customer: NewCustomer, background_tasks: BackgroundTasks)
 async def get_customers():
     """Get all customers."""
     try:
-        customers = sheets_service.get_customers()
+        customers = await sheets_service.get_customers()
         return {"customers": customers}
     except Exception as e:
         logger.error("sheets.customers_error", error=str(e))
@@ -43,7 +46,7 @@ async def get_customers():
 async def get_products():
     """Get all products."""
     try:
-        products = sheets_service.get_products()
+        products = await sheets_service.get_products()
         return {"products": products}
     except Exception as e:
         logger.error("sheets.products_error", error=str(e))
@@ -54,7 +57,7 @@ async def get_products():
 async def get_faq():
     """Get FAQ."""
     try:
-        faq = sheets_service.get_faq()
+        faq = await sheets_service.get_faq()
         return {"faq": faq}
     except Exception as e:
         logger.error("sheets.faq_error", error=str(e))

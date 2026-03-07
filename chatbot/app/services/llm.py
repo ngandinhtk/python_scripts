@@ -5,8 +5,9 @@ Xử lý giao tiếp với API DeepSeek để hoàn thành cuộc trò chuyện
 import httpx
 from typing import List, Dict, Optional
 from app.core.config import settings
-from app.core.logging import logger
+from app.core.logging import StructuredLogger
 
+logger = StructuredLogger(__name__)
 
 class DeepSeekLLMService:
     def __init__(self):
@@ -19,7 +20,7 @@ class DeepSeekLLMService:
     def _validate_api_key(self) -> bool:
         """Kiểm tra xem API key đã được cấu hình chưa."""
         if not self.api_key:
-            logger.warning("deepseek.no_api_key", msg="DEEPSEEK_API_KEY is not set")
+            logger.warning("deepseek.no_api_key", detail="DEEPSEEK_API_KEY is not set")
             return False
         return True
     
