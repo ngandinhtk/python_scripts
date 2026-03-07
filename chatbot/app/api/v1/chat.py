@@ -11,9 +11,40 @@ from app.core.logging import StructuredLogger
 import uuid
 import re
 import json
+import asyncio
 
 router = APIRouter()
 logger = StructuredLogger(__name__)
+
+# --- CONSTANTS: PROMPTS ---
+EXTRACTION_INSTRUCTION = (
+    "\n\n--- HƯỚNG DẪN TRÍCH XUẤT THÔNG TIN ---\n"
+    "Nếu người dùng cung cấp thông tin cá nhân (Họ và Tên, Số điện thoại, Email, Địa chỉ) hoặc có những yêu cầu quan trọng, hãy làm theo các bước sau:\n"
+    "1. **QUAN TRỌNG**: Nếu khách hàng chỉ cung cấp Tên mà CHƯA có Số điện thoại, hãy khéo léo hỏi xin Số điện thoại để tiện liên hệ/tư vấn.\n"
+    "2. Hãy trả lời họ một cách tự nhiên.\n"
+    "3. Ở CUỐI CÙNG của câu trả lời, hãy thêm một khối JSON đặc biệt theo định dạng sau để hệ thống ghi nhận:\n"
+    "   <<<CUSTOMER_DATA: {\"Họ và Tên\": \"...\", \"Số điện thoại\": \"...\", \"Email\": \"...\", \"Địa chỉ\": \"...\", \"Ghi chú\": \"...\"}>>>\n"
+    "   - **Ghi chú**: Tóm tắt các thông tin, yêu cầu quan trọng của khách hàng từ cuộc trò chuyện (ví dụ: 'quan tâm căn 2PN', 'muốn xem nhà cuối tuần', 'hỏi về chính sách vay').\n"
+    "   - Hệ thống sẽ tự động dùng 'Số điện thoại' hoặc 'Email' để tìm và CẬP NHẬT nếu khách hàng đã tồn tại, hoặc TẠO MỚI nếu chưa có.\n"
+    "   - Chỉ điền các trường có thông tin, bỏ qua nếu không có. Tên trường phải chính xác như ví dụ."
+)
+
+RAG_SYSTEM_PROMPT_TEMPLATE = (
+    "Bạn là một trợ lý Bất Động Sản chuyên nghiệp. Nhiệm vụ của bạn là trả lời câu hỏi của người dùng bằng ngôn ngữ của khách hàng.\n\n"
+    "Hãy tuân thủ nghiêm ngặt các quy tắc sau:\n"
+    "1. **QUAN TRỌNG NHẤT: PHẢI CÓ THÔNG TIN TÊN VÀ SỐ ĐIỆN THOẠI CỦA KHÁCH HÀNG SAU KHI HỎI.**\n"
+    "2. **Chỉ sử dụng thông tin trong phần `[Ngữ cảnh]` được cung cấp.** Không được tự ý suy diễn hay thêm thông tin không có trong ngữ cảnh.\n"
+    "3. Nếu thông tin trong `[Ngữ cảnh]` không đủ hoặc không liên quan, hãy lịch sự thông báo rằng bạn không tìm thấy thông tin. Sau đó, bạn có thể trả lời dựa trên kiến thức chung của mình nếu phù hợp.\n"
+    "4. Trình bày câu trả lời một cách rõ ràng, mạch lạc, thân thiện.\n\n"
+    "5. Dưới đây là phần `[Ngữ cảnh]` chứa thông tin liên quan được trích xuất từ cơ sở dữ liệu của chúng tôi. Hãy sử dụng nó một cách thông minh để trả lời câu hỏi của người dùng:\n"
+    "6. Nếu có nhiều đoạn ngữ cảnh, hãy tổng hợp chúng một cách logic để đưa ra câu trả lời tốt nhất.\n"
+    "7. Nếu có mâu thuẫn trong ngữ cảnh, hãy ưu tiên thông tin mới nhất hoặc có liên quan nhất.\n"
+    "8. Xưng hô với khách hàng một cách thân thiện, LUÔN XƯNG LÀ EM VÀ Phải gọi 'anh' hoặc 'chị' tùy ngữ cảnh.\n"
+    "--- [Ngữ cảnh] ---\n" 
+    "{context_str}\n"
+    "--- [Hết Ngữ cảnh] ---"
+)
+# --------------------------
 
 
 class Message(BaseModel):
@@ -46,35 +77,14 @@ async def chat(message: Message, background_tasks: BackgroundTasks):
         # 3. Lấy lịch sử cuộc trò chuyện
         history = await memory_service.get_history(session_id)
 
-        # Prompt hướng dẫn trích xuất thông tin
-        extraction_instruction = (
-            "\n\n--- HƯỚNG DẪN TRÍCH XUẤT THÔNG TIN ---\n"
-            "Nếu người dùng cung cấp thông tin cá nhân (Họ và Tên, Số điện thoại, Email, Địa chỉ) để liên hệ, mua hàng hoặc CẬP NHẬT thông tin:\n"
-            "1. Hãy trả lời họ một cách tự nhiên.\n"
-            "2. Ở CUỐI CÙNG của câu trả lời, hãy thêm một khối JSON đặc biệt theo định dạng sau để hệ thống ghi nhận:\n"
-            "   <<<CUSTOMER_DATA: {\"Họ và Tên\": \"...\", \"Số điện thoại\": \"...\", \"Email\": \"...\", \"Địa chỉ\": \"...\"}>>>\n"
-            "   - Hệ thống sẽ tự động dùng 'Số điện thoại' hoặc 'Email' để tìm và CẬP NHẬT nếu khách hàng đã tồn tại, hoặc TẠO MỚI nếu chưa có.\n"
-            "   - Chỉ điền các trường có thông tin, bỏ qua nếu không có. Tên trường phải chính xác như ví dụ."
-        )
-
         # 4. Xây dựng prompt với ngữ cảnh (nếu có)
         system_prompt = settings.SYSTEM_PROMPT
         if context_docs:
             context_str = "\n\n".join(context_docs)
-            system_prompt = (
-                "Bạn là một trợ lý Bất Động Sản chuyên nghiệp. Nhiệm vụ của bạn là trả lời câu hỏi của người dùng bằng ngôn ngữ của khách hàng.\n\n"
-                "Hãy tuân thủ nghiêm ngặt các quy tắc sau:\n"
-                "1. **QUAN TRỌNG NHẤT: Toàn bộ câu trả lời của bạn PHẢI được viết bằng tiếng Việt.**\n"
-                "2. **Chỉ sử dụng thông tin trong phần `[Ngữ cảnh]` được cung cấp.** Không được tự ý suy diễn hay thêm thông tin không có trong ngữ cảnh.\n"
-                "3. Nếu thông tin trong `[Ngữ cảnh]` không đủ hoặc không liên quan, hãy lịch sự thông báo rằng bạn không tìm thấy thông tin. Sau đó, bạn có thể trả lời dựa trên kiến thức chung của mình nếu phù hợp.\n"
-                "4. Trình bày câu trả lời một cách rõ ràng, mạch lạc, thân thiện.\n\n"
-                "5. Dưới đây là phần `[Ngữ cảnh]` chứa thông tin liên quan được trích xuất từ cơ sở dữ liệu của chúng tôi. Hãy sử dụng nó một cách thông minh để trả lời câu hỏi của người dùng:\n"
-                "--- [Ngữ cảnh] ---\n"
-                f"{context_str}\n"
-                "--- [Hết Ngữ cảnh] ---"
-            )
+            system_prompt = RAG_SYSTEM_PROMPT_TEMPLATE.format(context_str=context_str)
+            
         # Luôn thêm hướng dẫn trích xuất vào cuối prompt hệ thống
-        system_prompt += extraction_instruction
+        system_prompt += EXTRACTION_INSTRUCTION
 
         # Nếu không có ngữ cảnh, chatbot sẽ hoạt động như một trợ lý thông thường
         # với prompt hệ thống mặc định.
@@ -99,9 +109,6 @@ async def chat(message: Message, background_tasks: BackgroundTasks):
 
                 # Xóa phần data khỏi nội dung hiển thị cho người dùng
                 response_content = response_content.replace(match.group(0), "").strip()
-
-                # Thêm một ghi chú nhỏ vào cuối câu trả lời để người dùng biết
-                response_content += "\n\n*(Chúng tôi đã ghi nhận thông tin của bạn để tiện liên hệ lại.)*"
             except json.JSONDecodeError:
                 logger.error("chat.json_parse_error", data=json_str)
 
@@ -109,6 +116,9 @@ async def chat(message: Message, background_tasks: BackgroundTasks):
         # Lưu ý: Chỉ lưu phần text đã làm sạch vào lịch sử
         await memory_service.add_message(session_id, "assistant", response_content)
         background_tasks.add_task(sheets_service.log_chat_message, session_id, "assistant", response_content)
+
+        # Thêm độ trễ 3 giây trước khi gửi phản hồi
+        # await asyncio.sleep(3)
 
         return ChatResponse(
             session_id=session_id,

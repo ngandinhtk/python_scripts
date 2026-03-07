@@ -123,41 +123,33 @@ class GoogleSheetsService:
         age = datetime.now() - self._cache[sheet_id]["synced_at"]
         return age < timedelta(seconds=getattr(settings, 'SHEETS_SYNC_INTERVAL', 300))
 
+    async def _get_cached_sheet_data(self, sheet_id_key: str, sheet_name_key: str) -> List[Dict]:
+        """Helper to get cached data for a specific sheet, fetching if cache is invalid."""
+        sheet_id = getattr(settings, sheet_id_key, None)
+        if not sheet_id:
+            return []
+        
+        sheet_name = getattr(settings, sheet_name_key, "")
+        
+        if not self._is_cache_valid(sheet_id):
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, self._fetch_sheet, sheet_id, sheet_name)
+            self._cache[sheet_id] = {"data": data, "synced_at": datetime.now()}
+            logger.info("sheets.cache_updated", sheet_id=sheet_id[:8])
+
+        return self._cache[sheet_id].get("data", [])
+
     async def get_customers(self) -> List[Dict]:
         """Lấy danh sách khách hàng từ cache hoặc Sheet."""
-        sid = getattr(settings, 'SHEET_CUSTOMERS_ID', None)
-        sname = getattr(settings, 'SHEET_CUSTOMERS_NAME', "")
-        if not sid:
-            return []
-        if not self._is_cache_valid(sid):
-            loop = asyncio.get_event_loop()
-            data = await loop.run_in_executor(None, self._fetch_sheet, sid, sname)
-            self._cache[sid] = {"data": data, "synced_at": datetime.now()}
-        return self._cache[sid]["data"]
+        return await self._get_cached_sheet_data('SHEET_CUSTOMERS_ID', 'SHEET_CUSTOMERS_NAME')
 
     async def get_products(self) -> List[Dict]:
         """Lấy danh sách sản phẩm/dịch vụ."""
-        sid = getattr(settings, 'SHEET_PRODUCTS_ID', None)
-        sname = getattr(settings, 'SHEET_PRODUCTS_NAME', "")
-        if not sid:
-            return []
-        if not self._is_cache_valid(sid):
-            loop = asyncio.get_event_loop()
-            data = await loop.run_in_executor(None, self._fetch_sheet, sid, sname)
-            self._cache[sid] = {"data": data, "synced_at": datetime.now()}
-        return self._cache[sid]["data"]
+        return await self._get_cached_sheet_data('SHEET_PRODUCTS_ID', 'SHEET_PRODUCTS_NAME')
 
     async def get_faq(self) -> List[Dict]:
         """Lấy danh sách câu hỏi thường gặp."""
-        sid = getattr(settings, 'SHEET_FAQ_ID', None)
-        sname = getattr(settings, 'SHEET_FAQ_NAME', "")
-        if not sid:
-            return []
-        if not self._is_cache_valid(sid):
-            loop = asyncio.get_event_loop()
-            data = await loop.run_in_executor(None, self._fetch_sheet, sid, sname)
-            self._cache[sid] = {"data": data, "synced_at": datetime.now()}
-        return self._cache[sid]["data"]
+        return await self._get_cached_sheet_data('SHEET_FAQ_ID', 'SHEET_FAQ_NAME')
 
     async def find_customer(self, query: str) -> Optional[Dict]:
         """
@@ -172,10 +164,37 @@ class GoogleSheetsService:
                     return customer
         return None
 
+    def _ensure_log_sheet(self, sheet_id: str, sheet_name: str) -> Optional[gspread.Worksheet]:
+        """Đảm bảo sheet log tồn tại, nếu không thì tạo mới với header."""
+        try:
+            client = self._get_client()
+            spreadsheet = client.open_by_key(sheet_id)
+            try:
+                return spreadsheet.worksheet(sheet_name)
+            except gspread.exceptions.WorksheetNotFound:
+                # Tạo mới sheet nếu chưa có
+                sheet = spreadsheet.add_worksheet(title=sheet_name, rows=2000, cols=5)
+                # Thêm header
+                sheet.append_row(["Thời gian", "Session ID", "Role", "Nội dung"], value_input_option='USER_ENTERED')
+                logger.info("sheets.created_log_sheet", name=sheet_name)
+                return sheet
+        except Exception as e:
+            logger.error("sheets.ensure_log_sheet.error", error=str(e))
+            return None
+
+    def _append_log_row(self, sheet_id: str, row: List[str], sheet_name: str):
+        """Hàm sync để chạy trong executor."""
+        sheet = self._ensure_log_sheet(sheet_id, sheet_name)
+        if sheet:
+            try:
+                sheet.append_row(row, value_input_option='USER_ENTERED')
+            except Exception as e:
+                logger.error("sheets.log_append.error", error=str(e))
+
     async def log_chat_message(self, session_id: str, role: str, content: str):
         """Lưu tin nhắn chat vào Google Sheet."""
         sheet_id = settings.SHEET_LOGS_ID
-        sheet_name = getattr(settings, 'SHEET_LOGS_NAME', "") # Nếu bạn muốn cấu hình tên sheet logs
+        sheet_name = getattr(settings, 'SHEET_LOGS_NAME', "LOGS_DATA") # Mặc định lưu vào tab 'LOGS_DATA'
         if not sheet_id:
             return  # Không làm gì nếu không có sheet logs ID
 
@@ -184,10 +203,10 @@ class GoogleSheetsService:
 
         # Chạy tác vụ I/O trong thread pool để không block event loop
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self.append_row, sheet_id, row, sheet_name)
+        await loop.run_in_executor(None, self._append_log_row, sheet_id, row, sheet_name)
 
     async def add_customer(self, customer_data: Dict[str, Any]):
-        """Thêm hoặc cập nhật thông tin khách hàng dựa trên SĐT hoặc Email."""
+        """Thêm khách hàng mới, hoặc chỉ cập nhật cột 'Ghi chú' cho khách hàng đã tồn tại."""
         sheet_id = settings.SHEET_CUSTOMERS_ID
         sheet_name = getattr(settings, 'SHEET_CUSTOMERS_NAME', "")
         sheet = self._get_sheet(sheet_id, sheet_name)
@@ -196,25 +215,53 @@ class GoogleSheetsService:
 
         loop = asyncio.get_event_loop()
 
-        # Lấy header để đảm bảo đúng thứ tự cột
         headers = await loop.run_in_executor(None, sheet.row_values, 1)
         if not headers:
             raise ValueError("Không thể đọc header từ sheet khách hàng.")
 
+        # --- CHUẨN HÓA DỮ LIỆU (Mapping keys) ---
+        # Map các trường từ AI (Họ và Tên, Số điện thoại) sang header thực tế của Sheet (Tên, SĐT...)
+        key_mapping = {
+            "Họ và Tên": ["Tên", "Họ tên", "Name"],
+            "Số điện thoại": ["SĐT", "Phone", "Tel", "Mobile"],
+            "Địa chỉ": ["Nơi ở", "Address"],
+            "Email": ["Mail", "Gmail"]
+        }
+        
+        # Tạo bản sao để xử lý
+        data_to_save = customer_data.copy()
+        
+        for ai_key, sheet_aliases in key_mapping.items():
+            if ai_key in data_to_save:
+                value = data_to_save[ai_key]
+                for alias in sheet_aliases:
+                    if alias in headers and alias not in data_to_save:
+                        data_to_save[alias] = value
+
         # Xác định các trường định danh duy nhất (ưu tiên SĐT, sau đó đến Email)
         identifier_key = None
-        if "Số điện thoại" in customer_data and customer_data.get("Số điện thoại"):
-            identifier_key = "Số điện thoại"
-        elif "Email" in customer_data and customer_data.get("Email"):
-            identifier_key = "Email"
+        identifier_value = None
+        
+        # Tìm key định danh thực tế trong headers
+        phone_keys = ["Số điện thoại", "SĐT", "Phone", "Mobile"]
+        email_keys = ["Email", "Mail"]
+        
+        header_phone_key = next((k for k in phone_keys if k in headers), None)
+        header_email_key = next((k for k in email_keys if k in headers), None)
+
+        if header_phone_key and data_to_save.get(header_phone_key):
+            identifier_key = header_phone_key
+            identifier_value = data_to_save.get(identifier_key)
+        elif header_email_key and data_to_save.get(header_email_key):
+            identifier_key = header_email_key
+            identifier_value = data_to_save.get(identifier_key)
         
         found_cell = None
-        if identifier_key:
-            identifier_value = customer_data.get(identifier_key)
+        if identifier_key and identifier_value:
             try:
                 # Tìm cột chứa trường định danh
                 col_index = headers.index(identifier_key) + 1
-                # Tìm cell chứa giá trị định danh (Sử dụng partial để truyền keyword arg 'in_column')
+                # Tìm cell chứa giá trị định danh
                 find_func = partial(sheet.find, str(identifier_value), in_column=col_index)
                 found_cell = await loop.run_in_executor(None, find_func)
             except ValueError:
@@ -223,47 +270,48 @@ class GoogleSheetsService:
                 found_cell = None # Không tìm thấy, sẽ tạo mới
             except Exception as e:
                 logger.error("sheets.find_customer.error", error=str(e))
-                found_cell = None
+                found_cell = None # Lỗi thì coi như không tìm thấy để tránh mất dữ liệu
 
         if found_cell:
             # --- CẬP NHẬT KHÁCH HÀNG ---
             row_index = found_cell.row
             existing_data_list = await loop.run_in_executor(None, sheet.row_values, row_index)
             
-            # Đảm bảo danh sách dữ liệu có độ dài bằng header (gspread bỏ qua các cell rỗng cuối dòng)
             if len(existing_data_list) < len(headers):
                 existing_data_list.extend([""] * (len(headers) - len(existing_data_list)))
                 
             existing_data = dict(zip(headers, existing_data_list))
             
-            for key, value in customer_data.items():
-                if key in existing_data and value: # Chỉ cập nhật nếu có giá trị mới
-                    existing_data[key] = value
+            # --- LOGIC MỚI: Chỉ cập nhật cột "Ghi chú" cho khách hàng đã có ---
+            new_note = data_to_save.get("Ghi chú")
+            # Chỉ thực hiện nếu có ghi chú mới và cột "Ghi chú" tồn tại trong sheet
+            if new_note and "Ghi chú" in existing_data:
+                existing_note = existing_data.get("Ghi chú", "")
+                if existing_note:
+                    # Nối ghi chú mới vào ghi chú cũ, phân cách bằng dấu chấm phẩy
+                    existing_data["Ghi chú"] = f"{existing_note}; {new_note}"
+                else:
+                    existing_data["Ghi chú"] = new_note
             
             updated_row_values = [existing_data.get(header, "") for header in headers]
             await loop.run_in_executor(None, self.update_row, sheet_id, row_index, updated_row_values, sheet_name)
             logger.info("sheets.customer_updated", identifier=f"{identifier_key}={identifier_value}")
         else:
             # --- THÊM MỚI KHÁCH HÀNG ---
-            # Tự động tạo Mã KH nếu có cột "Mã KH" trong header nhưng chưa có dữ liệu
-            if "Mã KH" in headers and not customer_data.get("Mã KH"):
-                # Tạo mã KH: KH + 6 ký tự random (ví dụ: KH1A2B3C)
-                customer_data["Mã KH"] = f"KH{uuid.uuid4().hex[:6].upper()}"
-            
-            # Tự động thêm Ngày tạo nếu có cột này trong header
-            if "Ngày tạo" in headers and not customer_data.get("Ngày tạo"):
-                customer_data["Ngày tạo"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if "Mã KH" in headers and not data_to_save.get("Mã KH"):
+                data_to_save["Mã KH"] = f"KH{uuid.uuid4().hex[:6].upper()}"
+            if "Ngày tạo" in headers and not data_to_save.get("Ngày tạo"):
+                data_to_save["Ngày tạo"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            new_row_values = [customer_data.get(header, "") for header in headers]
+            new_row_values = [data_to_save.get(header, "") for header in headers]
             await loop.run_in_executor(None, self.append_row, sheet_id, new_row_values, sheet_name)
-            logger.info("sheets.customer_added", data=customer_data)
+            logger.info("sheets.customer_added", data=data_to_save)
             
-            # Gửi tin nhắn Zalo chào mừng (nếu có SĐT)
-            if "Số điện thoại" in customer_data and customer_data["Số điện thoại"]:
+            phone_for_zalo = data_to_save.get("Số điện thoại") or data_to_save.get("SĐT")
+            if phone_for_zalo:
                 from app.services.zalo import zalo_service
-                # Gửi tin nhắn ZNS
-                cust_name = customer_data.get("Họ và Tên") or customer_data.get("Tên") or "Quý khách"
-                await zalo_service.send_zns(customer_data["Số điện thoại"], cust_name, customer_data.get("Mã KH", ""))
+                cust_name = data_to_save.get("Họ và Tên") or data_to_save.get("Tên") or "Quý khách"
+                await zalo_service.send_zns(phone_for_zalo, cust_name, data_to_save.get("Mã KH", ""))
 
         # Vô hiệu hóa cache để lần đọc tiếp theo sẽ lấy dữ liệu mới
         if sheet_id in self._cache:
