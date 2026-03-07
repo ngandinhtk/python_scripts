@@ -1,0 +1,22 @@
+[build]
+  # Lệnh để cài đặt các thư viện
+  command = "pip install -r requirements.txt"
+  # Thư mục chứa các hàm serverless
+  functions = "netlify/functions"
+
+[functions]
+  # Tăng thời gian chạy tối đa cho hàm (mặc định là 10s)
+  # Gói miễn phí có thể giới hạn ở 10-15s
+  timeout = 25
+
+[[redirects]]
+  # Chuyển hướng tất cả các yêu cầu /api/* đến hàm serverless 'api'
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  # Chuyển hướng trang chủ đến file index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200

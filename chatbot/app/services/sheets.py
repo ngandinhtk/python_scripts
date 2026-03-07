@@ -7,11 +7,13 @@ Google Sheets Service
 import gspread
 from google.oauth2.service_account import Credentials
 from typing import List, Dict, Optional, Any
+import json
 import os
 import asyncio
 from datetime import datetime, timedelta
 from app.core.config import settings
 from app.core.logging import logger
+from functools import partial
 
 
 SCOPES = [
@@ -28,7 +30,6 @@ class GoogleSheetsService:
 
     def _get_client(self) -> gspread.Client:
         """Khởi tạo gspread client từ Service Account file."""
-        """Khởi tạo gspread client từ biến môi trường hoặc file."""
         if self._client:
             return self._client
 
@@ -193,8 +194,9 @@ class GoogleSheetsService:
             try:
                 # Tìm cột chứa trường định danh
                 col_index = headers.index(identifier_key) + 1
-                # Tìm cell chứa giá trị định danh
-                found_cell = await loop.run_in_executor(None, sheet.find, str(identifier_value), in_column=col_index)
+                # Tìm cell chứa giá trị định danh (Sử dụng partial để truyền keyword arg 'in_column')
+                find_func = partial(sheet.find, str(identifier_value), in_column=col_index)
+                found_cell = await loop.run_in_executor(None, find_func)
             except ValueError:
                 logger.warning("sheets.update.identifier_not_in_header", key=identifier_key)
             except gspread.exceptions.CellNotFound:
@@ -207,6 +209,11 @@ class GoogleSheetsService:
             # --- CẬP NHẬT KHÁCH HÀNG ---
             row_index = found_cell.row
             existing_data_list = await loop.run_in_executor(None, sheet.row_values, row_index)
+            
+            # Đảm bảo danh sách dữ liệu có độ dài bằng header (gspread bỏ qua các cell rỗng cuối dòng)
+            if len(existing_data_list) < len(headers):
+                existing_data_list.extend([""] * (len(headers) - len(existing_data_list)))
+                
             existing_data = dict(zip(headers, existing_data_list))
             
             for key, value in customer_data.items():

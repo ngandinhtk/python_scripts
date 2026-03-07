@@ -7,6 +7,7 @@ google-auth-oauthlib
 SQLAlchemy
 aiosqlite
 python-dotenv
+mangum
 # Giả định bạn đang dùng các thư viện này, hãy kiểm tra và bỏ comment nếu đúng
-# chromadb
-# deepseek
+chromadb
+deepseek
