@@ -21,12 +21,15 @@ EXTRACTION_INSTRUCTION = (
     "\n\n--- HƯỚNG DẪN TRÍCH XUẤT THÔNG TIN ---\n"
     "Nếu người dùng cung cấp thông tin cá nhân (Họ và Tên, Số điện thoại, Email, Địa chỉ) hoặc có những yêu cầu quan trọng, hãy làm theo các bước sau:\n"
     "1. **QUAN TRỌNG**: Nếu khách hàng chỉ cung cấp Tên mà CHƯA có Số điện thoại, hãy khéo léo hỏi xin Số điện thoại để tiện liên hệ/tư vấn.\n"
-    "2. Hãy trả lời họ một cách tự nhiên.\n"
+    "2. Hãy trả lời họ một cách tự nhiên. Luôn luôn xưng bằng EM\n"
     "3. Ở CUỐI CÙNG của câu trả lời, hãy thêm một khối JSON đặc biệt theo định dạng sau để hệ thống ghi nhận:\n"
     "   <<<CUSTOMER_DATA: {\"Họ và Tên\": \"...\", \"Số điện thoại\": \"...\", \"Email\": \"...\", \"Địa chỉ\": \"...\", \"Ghi chú\": \"...\"}>>>\n"
     "   - **Ghi chú**: Tóm tắt các thông tin, yêu cầu quan trọng của khách hàng từ cuộc trò chuyện (ví dụ: 'quan tâm căn 2PN', 'muốn xem nhà cuối tuần', 'hỏi về chính sách vay').\n"
     "   - Hệ thống sẽ tự động dùng 'Số điện thoại' hoặc 'Email' để tìm và CẬP NHẬT nếu khách hàng đã tồn tại, hoặc TẠO MỚI nếu chưa có.\n"
-    "   - Chỉ điền các trường có thông tin, bỏ qua nếu không có. Tên trường phải chính xác như ví dụ."
+    "   - Chỉ điền các trường có thông tin, bỏ qua nếu không có. Tên trường phải chính xác như ví dụ. \n"
+    "4. Nếu không có thông tin nào được cung cấp, hoặc nếu khách hàng từ chối cung cấp, hãy trả về một khối JSON rỗng: <<<CUSTOMER_DATA: {}>>>\n"
+    "5. Lưu ý không được sử dụng ký tự đặt biệt trong phần trả lời.\n"
+    
 )
 
 RAG_SYSTEM_PROMPT_TEMPLATE = (

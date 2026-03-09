@@ -1,22 +1,14 @@
 [build]
-  # Lệnh để cài đặt các thư viện
-  command = "pip install -r requirements.txt"
-  # Thư mục chứa các hàm serverless
+  # This is the directory where Netlify will look for your serverless functions.
   functions = "netlify/functions"
 
 [functions]
-  # Tăng thời gian chạy tối đa cho hàm (mặc định là 10s)
-  # Gói miễn phí có thể giới hạn ở 10-15s
-  timeout = 25
+  # This ensures that your main application code in the 'app' directory
+  # is included in the deployment package for the function.
+  included_files = ["app/**"]
 
 [[redirects]]
-  # Chuyển hướng tất cả các yêu cầu /api/* đến hàm serverless 'api'
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-
-[[redirects]]
-  # Chuyển hướng trang chủ đến file index.html
+  # This rule rewrites all incoming requests to your serverless function.
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/server"
   status = 200
