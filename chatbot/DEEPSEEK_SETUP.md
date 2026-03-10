@@ -1,3 +1,6 @@
+<!-- NETLIFY DELOYMENT -->
+https://agent-69ae8631ed377299a0011bdd--server-pythons.netlify.app/
+
 # DeepSeek API Integration Setup
 
 ## 1. Get DeepSeek API Key

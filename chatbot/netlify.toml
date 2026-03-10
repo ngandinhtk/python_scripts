@@ -1,14 +1,30 @@
+# netlify.toml
+# File cấu hình để deploy ứng dụng Python FastAPI lên Netlify.
+
 [build]
-  # This is the directory where Netlify will look for your serverless functions.
-  functions = "netlify/functions"
+  # Lệnh để cài đặt các thư viện Python cần thiết từ file requirements.txt.
+  command = "pip install -r requirements.txt"
+  
+  # Thư mục chứa các file frontend tĩnh (HTML, CSS, JS) để publish.
+  # Dựa trên file main.py, thư mục này có tên là "static".
+  publish = "static"
 
 [functions]
-  # This ensures that your main application code in the 'app' directory
-  # is included in the deployment package for the function.
-  included_files = ["app/**"]
+  # Thư mục chứa file serverless function.
+  # Vì server.py nằm ở thư mục gốc, chúng ta chỉ định là ".".
+  directory = "."
+
+# Cấu hình chuyển hướng (redirects) rất quan trọng.
+[[redirects]]
+  # Chuyển hướng tất cả các request API (bắt đầu bằng /api/)
+  # đến serverless function 'server' (được tạo từ file server.py).
+  from = "/api/*"
+  to = "/.netlify/functions/server/:splat"
+  status = 200
 
 [[redirects]]
-  # This rule rewrites all incoming requests to your serverless function.
+  # Dành cho ứng dụng trang đơn (Single Page Application).
+  # Đảm bảo mọi đường dẫn không phải API đều trỏ về index.html để client-side routing hoạt động.
   from = "/*"
-  to = "/.netlify/functions/server"
+  to = "/index.html"
   status = 200
